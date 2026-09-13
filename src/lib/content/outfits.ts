@@ -131,3 +131,91 @@ export function scholarLine(opts: { hour: number; dailyDone: number; dailyTotal:
 export function statFill(n: number) {
   return Math.max(3, Math.min(100, Math.round(n)));
 }
+
+export type LookSlot = "top" | "bottom" | "outer" | "extra";
+export type TopId = "jumper" | "cardigan" | "blouse" | "polo";
+export type BottomId = "skirt" | "skort";
+export type OuterId = "none" | "jacket";
+export type ExtraId = "none" | "tights" | "rosette";
+
+export type ScholarLook = {
+  top: TopId;
+  bottom: BottomId;
+  outer: OuterId;
+  extra: ExtraId;
+};
+
+export const DEFAULT_LOOK: ScholarLook = { top: "jumper", bottom: "skirt", outer: "none", extra: "tights" };
+
+export type Piece = {
+  slot: LookSlot;
+  id: string;
+  name: string;
+  closet: string;
+  need: string;
+  outfit: OutfitId | "none";
+};
+
+export const PIECES: Piece[] = [
+  { slot: "top", id: "jumper", name: "Teal jumper", closet: "/art/closet/day.jpg", need: "Starter", outfit: "day" },
+  { slot: "top", id: "cardigan", name: "Cardigan", closet: "/art/closet/library.jpg", need: "Earn 60 Scholar XP", outfit: "library" },
+  { slot: "top", id: "blouse", name: "Summer blouse", closet: "/art/closet/spring.jpg", need: "Grow the garden to Courtyard", outfit: "spring" },
+  { slot: "top", id: "polo", name: "PE polo", closet: "/art/closet/pe.jpg", need: "Complete one PE circuit", outfit: "pe" },
+  { slot: "bottom", id: "skirt", name: "Charcoal skirt", closet: "/art/closet/day.jpg", need: "Starter", outfit: "day" },
+  { slot: "bottom", id: "skort", name: "PE skort", closet: "/art/closet/pe.jpg", need: "Complete one PE circuit", outfit: "pe" },
+  { slot: "outer", id: "none", name: "No jacket", closet: "/art/closet/day.jpg", need: "Starter", outfit: "none" },
+  { slot: "outer", id: "jacket", name: "Storm jacket", closet: "/art/closet/rose.jpg", need: "Complete two PE circuits", outfit: "rose" },
+  { slot: "extra", id: "none", name: "No extra", closet: "/art/closet/spring.jpg", need: "Starter", outfit: "none" },
+  { slot: "extra", id: "tights", name: "Black tights", closet: "/art/closet/winter.jpg", need: "Starter", outfit: "day" },
+  { slot: "extra", id: "rosette", name: "Prize rosette", closet: "/art/closet/latin.jpg", need: "Master 5 Latin topics", outfit: "latin" },
+];
+
+export function isPieceUnlocked(piece: Piece, unlockedOutfits: string[]) {
+  if (piece.outfit === "none") return true;
+  if (piece.id === "tights") return true;
+  return unlockedOutfits.includes(piece.outfit);
+}
+
+export function artForLook(look: ScholarLook) {
+  if (look.outer === "jacket" && look.bottom === "skort") return "/art/outfits/rose.jpg";
+  if (look.outer === "jacket") return "/art/outfits/mix-jacket.jpg";
+  if (look.extra === "rosette") return "/art/outfits/latin.jpg?v=plain";
+  if (look.top === "polo") return "/art/outfits/pe.jpg?v=plain";
+  if (look.top === "jumper" && look.bottom === "skort") return "/art/outfits/mix-sport.jpg";
+  if (look.top === "cardigan" && look.bottom === "skort") return "/art/outfits/mix-card-pe.jpg";
+  if (look.top === "cardigan") return "/art/outfits/library.jpg?v=plain";
+  if (look.top === "blouse" && look.extra === "tights") return "/art/outfits/mix-tights.jpg";
+  if (look.top === "blouse") return "/art/outfits/spring.jpg";
+  if (look.extra === "tights") return "/art/outfits/winter.jpg?v=plain";
+  return "/art/outfits/day.jpg?v=plain";
+}
+
+export function lookFromOutfit(id: OutfitId): ScholarLook {
+  switch (id) {
+    case "library":
+      return { top: "cardigan", bottom: "skirt", outer: "none", extra: "tights" };
+    case "spring":
+      return { top: "blouse", bottom: "skirt", outer: "none", extra: "none" };
+    case "pe":
+      return { top: "polo", bottom: "skort", outer: "none", extra: "none" };
+    case "rose":
+      return { top: "polo", bottom: "skort", outer: "jacket", extra: "none" };
+    case "latin":
+      return { top: "jumper", bottom: "skirt", outer: "none", extra: "rosette" };
+    case "winter":
+      return { top: "jumper", bottom: "skirt", outer: "none", extra: "tights" };
+    default:
+      return { ...DEFAULT_LOOK };
+  }
+}
+
+export function lookLabel(look: ScholarLook) {
+  const top = PIECES.find((p) => p.id === look.top)?.name ?? look.top;
+  const bottom = PIECES.find((p) => p.id === look.bottom)?.name ?? look.bottom;
+  const bits = [top, bottom];
+  if (look.outer === "jacket") bits.push("storm jacket");
+  if (look.extra === "rosette") bits.push("rosette");
+  if (look.extra === "tights") bits.push("tights");
+  return bits.join(" · ");
+}
+

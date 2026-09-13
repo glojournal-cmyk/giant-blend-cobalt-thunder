@@ -3,11 +3,16 @@ import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { FormaForge, ManuscriptMystery, SentenceMosaic, VerbumMatch } from "@/components/games/latin-games";
 import { MotMatch, PhraseMosaic } from "@/components/games/french-games";
+import { PairMatch } from "@/components/games/pair-match";
 import { PE_GAME, PeCircuit } from "@/components/games/pe-circuit";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { BIO_GAMES, BIO_PAIRS } from "@/lib/content/biology";
+import { CHEM_GAMES, CHEM_PAIRS } from "@/lib/content/chemistry";
+import { ENG_GAMES, ENG_PAIRS } from "@/lib/content/english";
 import { FRENCH_GAMES } from "@/lib/content/french";
 import { LATIN_GAMES } from "@/lib/content/latin";
+import { PHYS_GAMES, PHYS_PAIRS } from "@/lib/content/physics";
 import { useScholar } from "@/lib/store";
 
 export const Route = createFileRoute("/play/$game")({ component: PlayPage });
@@ -16,7 +21,11 @@ function PlayPage() {
   const { game } = Route.useParams();
   const latinMeta = LATIN_GAMES.find((item) => item.id === game);
   const frenchMeta = FRENCH_GAMES.find((item) => item.id === game);
-  const meta = game === PE_GAME.id ? PE_GAME : latinMeta ?? frenchMeta;
+  const chemMeta = CHEM_GAMES.find((item) => item.id === game);
+  const physMeta = PHYS_GAMES.find((item) => item.id === game);
+  const engMeta = ENG_GAMES.find((item) => item.id === game);
+  const bioMeta = BIO_GAMES.find((item) => item.id === game);
+  const meta = game === PE_GAME.id ? PE_GAME : latinMeta ?? frenchMeta ?? chemMeta ?? physMeta ?? engMeta ?? bioMeta;
   const progress = useScholar((s) => s.games[game]);
   const [level, setLevel] = useState<number | null>(null);
 
@@ -32,6 +41,18 @@ function PlayPage() {
     if (game === "manuscript") return <ManuscriptMystery level={level} />;
     if (game === "mot-match") return <MotMatch level={level} />;
     if (game === "phrase-mosaic") return <PhraseMosaic level={level} />;
+    if (game === "element-match") {
+      return <PairMatch gameId={game} title="Element Match" kicker="Chemistry" backSubject="chemistry" pairs={CHEM_PAIRS} level={level} />;
+    }
+    if (game === "force-match") {
+      return <PairMatch gameId={game} title="Force Match" kicker="Physics" backSubject="physics" pairs={PHYS_PAIRS} level={level} />;
+    }
+    if (game === "word-match") {
+      return <PairMatch gameId={game} title="Word Match" kicker="English" backSubject="english" pairs={ENG_PAIRS} level={level} />;
+    }
+    if (game === "organelle-match") {
+      return <PairMatch gameId={game} title="Organelle Match" kicker="Biology" backSubject="biology" pairs={BIO_PAIRS} level={level} />;
+    }
   }
 
   const unlocked = progress?.unlocked ?? 1;

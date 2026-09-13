@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FRENCH_VOCAB } from "@/lib/content/french";
-import { playComplete, playCorrect, playWrong } from "@/lib/audio";
+import { playComplete, playCorrect, playFlip, playWrong } from "@/lib/audio";
 import { useScholar } from "@/lib/store";
 import { shuffle } from "@/lib/utils";
 
@@ -37,6 +37,7 @@ export function MotMatch({ level }: { level: number }) {
     if (matched.includes(value)) return;
     if (!picked) {
       setPicked(`${side}:${value}`);
+      playFlip();
       return;
     }
     const [ps, pv] = picked.split(":");
@@ -131,6 +132,7 @@ export function PhraseMosaic({ level }: { level: number }) {
   const [done, setDone] = useState(false);
 
   function take(tile: string, i: number) {
+    playFlip();
     setBuilt((b) => [...b, tile]);
     setPool((p) => p.filter((_, idx) => idx !== i));
   }

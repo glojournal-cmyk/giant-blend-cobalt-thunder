@@ -25,9 +25,10 @@ function SubjectHub() {
   const setLast = useScholar((s) => s.setLastSubject);
   const reviews = useScholar((s) => s.reviews);
   const due = dueReviewCount(reviews);
-  const questions = questionsFor(subject);
+  const year = useScholar((s) => s.year);
+  const questions = questionsFor(subject, year);
   const lessons = lessonsFor(subject);
-  const topics = topicsFor(subject);
+  const topics = topicsFor(subject, year);
 
   useEffect(() => {
     setLast(subject);

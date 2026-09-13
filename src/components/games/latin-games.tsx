@@ -11,7 +11,7 @@ import {
   MATCH_PAIRS,
   MOSAIC_ITEMS,
 } from "@/lib/content/latin";
-import { playComplete, playCorrect, playWrong } from "@/lib/audio";
+import { playClick, playComplete, playCorrect, playWrong } from "@/lib/audio";
 import { useScholar } from "@/lib/store";
 import { shuffle } from "@/lib/utils";
 
@@ -464,7 +464,10 @@ function Tile({
     <button
       type="button"
       disabled={used}
-      onClick={onClick}
+      onClick={() => {
+        playClick();
+        onClick();
+      }}
       className={`min-h-11 rounded-md border px-3 py-2 text-sm ${
         used
           ? "border-sage-2 bg-sage text-muted"

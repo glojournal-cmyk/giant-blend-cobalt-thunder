@@ -77,4 +77,82 @@ export const PHYS_QUESTIONS = [
     choices: ["kinetic energy", "gravitational potential only", "no energy", "chemical energy only"],
     explain: "Kinetic energy is the energy of motion.",
   },
+  {
+    id: "p9",
+    topic: "Forces",
+    prompt: "Weight is…",
+    answer: "the gravitational force on a mass",
+    accepted: ["the gravitational force on a mass", "mass times g", "gravitational force"],
+    choices: ["the gravitational force on a mass", "the same as mass", "measured in kilograms", "a type of energy"],
+    explain: "Weight (N) = mass (kg) × g.",
+  },
+  {
+    id: "p10",
+    topic: "Energy",
+    prompt: "Power is the rate of…",
+    answer: "energy transfer",
+    accepted: ["energy transfer", "doing work", "transferring energy"],
+    choices: ["energy transfer", "distance travelled", "mass gained", "voltage only"],
+    explain: "Power (W) = energy (J) / time (s).",
+  },
+  {
+    id: "p11",
+    topic: "Waves",
+    prompt: "Frequency is measured in…",
+    answer: "hertz",
+    accepted: ["hertz", "hz"],
+    choices: ["hertz", "metres", "newtons", "joules"],
+    explain: "1 Hz = one wave per second.",
+  },
+  {
+    id: "p12",
+    topic: "Waves", prompt: "Light travels fastest in…",
+    answer: "a vacuum",
+    accepted: ["a vacuum", "vacuum", "space"],
+    choices: ["a vacuum", "glass", "water", "diamond"],
+    explain: "Light is slower in denser transparent materials.",
+  },
+  {
+    id: "p13",
+    topic: "Forces",
+    prompt: "An object moving in a circle at constant speed is still accelerating because…",
+    answer: "its direction is changing",
+    accepted: ["its direction is changing", "direction changes", "velocity is changing"],
+    choices: ["its direction is changing", "its mass is changing", "speed must increase", "gravity switches off"],
+    explain: "Velocity includes direction, so changing direction is acceleration.",
+  },
+  {
+    id: "p14",
+    topic: "Energy",
+    prompt: "A kettle transfers electrical energy mainly to…",
+    answer: "thermal energy",
+    accepted: ["thermal energy", "heat", "internal energy"],
+    choices: ["thermal energy", "sound only", "nuclear energy", "gravitational potential"],
+    explain: "The useful transfer is heating the water.",
+  },
+  {
+    id: "p15",
+    topic: "Waves",
+    prompt: "Amplitude is the…",
+    answer: "maximum displacement from the rest position",
+    accepted: ["maximum displacement from the rest position", "height of the wave", "maximum displacement"],
+    choices: ["maximum displacement from the rest position", "number of waves per second", "crest-to-crest distance", "wave speed"],
+    explain: "Larger amplitude → louder sound / brighter light.",
+  },
 ];
+
+export const PHYS_PAIRS = [
+  { left: "newton", right: "force" },
+  { left: "joule", right: "energy" },
+  { left: "watt", right: "power" },
+  { left: "metre", right: "distance" },
+  { left: "hertz", right: "frequency" },
+  { left: "pascal", right: "pressure" },
+  { left: "second", right: "time" },
+  { left: "kilogram", right: "mass" },
+];
+
+export const PHYS_GAMES = [
+  { id: "force-match", name: "Force Match", kicker: "Units", blurb: "Match the unit to the quantity.", levels: 6 },
+] as const;
+

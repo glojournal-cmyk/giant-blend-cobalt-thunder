@@ -6,13 +6,14 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { playComplete, playCorrect, playWrong } from "@/lib/audio";
+import { ENG_VOCAB } from "@/lib/content/english";
 import { FRENCH_VOCAB } from "@/lib/content/french";
 import { LATIN_VOCAB } from "@/lib/content/latin";
 import { linkFromHref } from "@/lib/nav";
 import { useScholar } from "@/lib/store";
 import { foldFrench, foldLatin, shuffle } from "@/lib/utils";
 
-type Lang = "latin" | "french";
+type Lang = "latin" | "french" | "english";
 
 type DictItem = { id: string; prompt: string; answer: string; extra?: string[]; topic: string };
 
@@ -32,6 +33,14 @@ export function dictationBank(lang: Lang): DictItem[] {
       prompt: item.english,
       answer: item.latin.replace("ē / ex", "ex"),
       extra: item.extra,
+      topic: item.topic,
+    }));
+  }
+  if (lang === "english") {
+    return ENG_VOCAB.map((item) => ({
+      id: item.id,
+      prompt: item.meaning,
+      answer: item.term,
       topic: item.topic,
     }));
   }
@@ -86,7 +95,7 @@ export function Dictation({
     if (ok) setScore((n) => n + 1);
     recordAttempt(item.id, ok, lang);
     if (lang === "french") recordSpelling(item.id, ok);
-    bumpDaily(lang === "latin" ? "latin-practice" : "french-vocab", 1);
+    bumpDaily(lang === "latin" ? "latin-practice" : lang === "french" ? "french-vocab" : "latin-practice", 1);
     if (sound) (ok ? playCorrect : playWrong)();
   }
 
@@ -218,8 +227,8 @@ export function VocabBank({ lang }: { lang: Lang }) {
         <table className="w-full text-left text-sm">
           <thead className="bg-sage text-xs tracking-[0.14em] text-navy uppercase">
             <tr>
-              <th className="px-4 py-2">{lang === "latin" ? "Latin" : "French"}</th>
-              <th className="px-4 py-2">English</th>
+              <th className="px-4 py-2">{lang === "latin" ? "Latin" : lang === "french" ? "French" : "Term"}</th>
+              <th className="px-4 py-2">{lang === "english" ? "Meaning" : "English"}</th>
               <th className="px-4 py-2">Topic</th>
             </tr>
           </thead>

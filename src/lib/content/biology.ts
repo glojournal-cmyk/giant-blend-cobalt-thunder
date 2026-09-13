@@ -195,3 +195,19 @@ export const BIO_QUESTIONS: BioQuestion[] = [
     explain: "Only about 10% of energy is passed on; the rest is lost as heat, waste and movement.",
   },
 ];
+
+export const BIO_PAIRS = [
+  { left: "nucleus", right: "controls the cell / DNA" },
+  { left: "mitochondria", right: "release energy" },
+  { left: "chloroplast", right: "photosynthesis" },
+  { left: "ribosome", right: "makes proteins" },
+  { left: "vacuole", right: "stores sap in plants" },
+  { left: "cell wall", right: "supports plant cells" },
+  { left: "cell membrane", right: "controls what enters" },
+  { left: "cytoplasm", right: "where reactions happen" },
+];
+
+export const BIO_GAMES = [
+  { id: "organelle-match", name: "Organelle Match", kicker: "Cells", blurb: "Match each organelle to its job.", levels: 6 },
+] as const;
+

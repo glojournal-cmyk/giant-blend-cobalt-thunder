@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { COLLECTIBLES } from "@/lib/content/collectibles";
-import { isOutfitUnlocked, OUTFITS, type OutfitId } from "@/lib/content/outfits";
+import { isOutfitUnlocked, OUTFITS, DEFAULT_LOOK, lookFromOutfit, type OutfitId, type ScholarLook } from "@/lib/content/outfits";
 import { gardenStage, levelFromXp, XP_RULES, type XpEvent } from "@/lib/xp";
 import { addDays, todayKey } from "@/lib/utils";
 import type { SubjectId } from "@/lib/content/subjects";
@@ -68,6 +68,8 @@ type ScholarState = {
   lastTopic: string | null;
   eventCounts: Record<string, number>;
   equippedOutfit: OutfitId;
+  look: ScholarLook;
+  year: 8 | 9;
   unlockedOutfits: string[];
   peSessions: number;
   lessonsDone: string[];
@@ -87,6 +89,8 @@ type ScholarActions = {
   setNotifications: (on: boolean) => void;
   setLastSubject: (id: string) => void;
   setLastTopic: (id: string) => void;
+  setYear: (year: 8 | 9) => void;
+  setLook: (patch: Partial<ScholarLook>) => void;
   equipOutfit: (id: OutfitId) => void;
   award: (event: XpEvent, opts?: { subject?: SubjectKey; detail?: string }) => AwardResult;
   recordAttempt: (id: string, ok: boolean, subject: SubjectKey) => AwardResult;
@@ -102,7 +106,19 @@ type ScholarActions = {
 
 export type ScholarStore = ScholarState & ScholarActions;
 
-const GAME_IDS = ["forma-forge", "sentence-mosaic", "verbum-match", "manuscript", "pe-circuit", "mot-match", "phrase-mosaic"];
+const GAME_IDS = [
+  "forma-forge",
+  "sentence-mosaic",
+  "verbum-match",
+  "manuscript",
+  "pe-circuit",
+  "mot-match",
+  "phrase-mosaic",
+  "element-match",
+  "force-match",
+  "word-match",
+  "organelle-match",
+];
 
 function emptyGames() {
   return Object.fromEntries(
@@ -129,7 +145,7 @@ function mapLegacyOutfit(id: string | undefined): OutfitId {
 
 function initialState(): ScholarState {
   return {
-    version: 3,
+    version: 4,
     displayName: "",
     philosophy: "Small steps, consistent effort, and a curious mind.",
     xp: 0,
@@ -160,6 +176,8 @@ function initialState(): ScholarState {
     lastTopic: null,
     eventCounts: {},
     equippedOutfit: "day",
+    look: { ...DEFAULT_LOOK },
+    year: 9,
     unlockedOutfits: ["day"],
     peSessions: 0,
     lessonsDone: [],
@@ -298,9 +316,14 @@ export const useScholar = create<ScholarStore>()(
       setNotifications: (on) => set({ notifications: on }),
       setLastSubject: (id) => set({ lastSubject: id }),
       setLastTopic: (id) => set({ lastTopic: id }),
+      setYear: (year) => set({ year }),
+      setLook: (patch) => {
+        const look = { ...get().look, ...patch };
+        set({ look });
+      },
       equipOutfit: (id) => {
         if (!get().unlockedOutfits.includes(id)) return;
-        set({ equippedOutfit: id });
+        set({ equippedOutfit: id, look: lookFromOutfit(id) });
       },
       award: (event, opts) => {
         const state = get();
@@ -462,14 +485,15 @@ export const useScholar = create<ScholarStore>()(
     }),
     {
       name: "lux-scholar-garden-v1",
-      version: 3,
+      version: 4,
       migrate: (persisted) => {
-        const p = persisted as ScholarState & { equippedOutfit?: string; unlockedOutfits?: string[] };
+        const p = persisted as ScholarState & { equippedOutfit?: string; unlockedOutfits?: string[]; look?: ScholarLook; year?: 8 | 9 };
         const outfits = (p.unlockedOutfits ?? ["day"]).map(mapLegacyOutfit);
+        const equipped = mapLegacyOutfit(p.equippedOutfit);
         return {
           ...initialState(),
           ...p,
-          version: 3,
+          version: 4,
           philosophy: p.philosophy || "Small steps, consistent effort, and a curious mind.",
           chemXp: p.chemXp ?? 0,
           physXp: p.physXp ?? 0,
@@ -482,7 +506,9 @@ export const useScholar = create<ScholarStore>()(
           activity: p.activity ?? {},
           xpToday: p.xpToday ?? 0,
           questionsToday: p.questionsToday ?? 0,
-          equippedOutfit: mapLegacyOutfit(p.equippedOutfit),
+          equippedOutfit: equipped,
+          look: p.look ?? lookFromOutfit(equipped),
+          year: p.year === 8 ? 8 : 9,
           unlockedOutfits: [...new Set(["day", ...outfits])],
           games: { ...emptyGames(), ...p.games },
         };

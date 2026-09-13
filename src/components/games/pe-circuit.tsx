@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { playComplete, playCorrect, playWrong } from "@/lib/audio";
+import { playComplete, playCorrect, playHit, playWrong } from "@/lib/audio";
 import { outfitById } from "@/lib/content/outfits";
 import { useScholar } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -156,7 +156,7 @@ function CatchStation({
     if (hit) {
       hitsRef.current += 1;
       setHits(hitsRef.current);
-      if (sound) playCorrect();
+      playHit();
     } else if (sound) playWrong();
     const nextRound = roundRef.current + 1;
     roundRef.current = nextRound;

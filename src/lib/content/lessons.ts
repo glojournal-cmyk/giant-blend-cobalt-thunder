@@ -247,6 +247,54 @@ export const LESSONS: Lesson[] = [
       { prompt: "Which narrative voice uses the pronoun I?", hint: "The narrator is inside the story.", answer: "first person", accepted: ["first person", "first-person"] },
     ],
   },
+  {
+    id: "atoms",
+    subject: "chemistry",
+    title: "Atoms & Elements",
+    kicker: "The building blocks of everything you can hold.",
+    summary: "Atoms, elements, and how the periodic table organises them.",
+    remember: [
+      "An element is made of one type of atom.",
+      "Atomic number = number of protons.",
+      "Electrons occupy shells around the nucleus.",
+    ],
+    later: ["Isotopes have the same protons, different neutrons.", "Ions form when electrons are lost or gained."],
+    explanation: [
+      { heading: "Inside the atom", body: "A tiny nucleus holds protons (positive) and neutrons (neutral). Electrons (negative) move in shells. Most of an atom is empty space." },
+      { heading: "Elements", body: "Each element has a unique atomic number. Group 1 metals react vigorously; Group 0 noble gases barely react at all." },
+    ],
+    table: {
+      caption: "Particles",
+      headers: ["Particle", "Charge", "Where"],
+      rows: [
+        ["Proton", "+1", "nucleus"],
+        ["Neutron", "0", "nucleus"],
+        ["Electron", "−1", "shells"],
+      ],
+    },
+    checks: [
+      { prompt: "What number identifies an element?", hint: "It equals the number of protons.", answer: "atomic number", accepted: ["atomic number", "proton number"] },
+    ],
+  },
+  {
+    id: "techniques",
+    subject: "english",
+    title: "Language Techniques",
+    kicker: "Name the tool, then say what it does to the reader.",
+    summary: "Simile, metaphor, personification, and why writers choose them.",
+    remember: [
+      "Simile uses like or as.",
+      "Metaphor says one thing is another.",
+      "Always explain the effect, not just the label.",
+    ],
+    later: ["Compare how two techniques work together in the same line."],
+    explanation: [
+      { heading: "Spot, name, effect", body: "Find the image. Name the technique. Then say what it makes the reader feel, picture, or understand." },
+    ],
+    checks: [
+      { prompt: "The moon was a silver coin. Technique?", hint: "No like or as.", answer: "metaphor", accepted: ["metaphor", "a metaphor"] },
+    ],
+  },
 ];
 
 export function lessonsFor(subject: string) {

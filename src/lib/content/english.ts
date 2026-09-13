@@ -77,4 +77,92 @@ export const ENG_QUESTIONS = [
     choices: ["mood", "rhyme", "stanza", "caption"],
     explain: "Mood is the feeling created for the reader. Tone is the writer’s attitude.",
   },
+  {
+    id: "e9",
+    topic: "Language techniques",
+    prompt: "Giving human qualities to an object or idea is…",
+    answer: "personification",
+    accepted: ["personification"],
+    choices: ["personification", "simile", "ballad", "aside"],
+    explain: "The sea roared — the sea is not literally a creature, but it acts like one.",
+  },
+  {
+    id: "e10",
+    topic: "Writing",
+    prompt: "PEEL in a paragraph often stands for Point, Evidence, Explain, and…",
+    answer: "Link",
+    accepted: ["link", "link back"],
+    choices: ["Link", "List", "Lyric", "Legend"],
+    explain: "The last sentence links back to the question or the next idea.",
+  },
+  {
+    id: "e11",
+    topic: "Narrative",
+    prompt: "A turning point in a plot is often called the…",
+    answer: "climax",
+    accepted: ["climax", "the climax"],
+    choices: ["climax", "prologue", "index", "blurb"],
+    explain: "Tension builds to a climax, then falls towards the resolution.",
+  },
+  {
+    id: "e12",
+    topic: "Language techniques",
+    prompt: "Deliberate exaggeration for effect is…",
+    answer: "hyperbole",
+    accepted: ["hyperbole"],
+    choices: ["hyperbole", "haiku", "enjambment", "aside"],
+    explain: "I’ve told you a million times — not literal.",
+  },
+  {
+    id: "e13",
+    topic: "Writing",
+    prompt: "A rhetorical question is asked…",
+    answer: "to make a point, not to get an answer",
+    accepted: ["to make a point, not to get an answer", "for effect", "not for an answer"],
+    choices: ["to make a point, not to get an answer", "only in exams", "only in poems", "to list nouns"],
+    explain: "It invites the reader to agree or think.",
+  },
+  {
+    id: "e14",
+    topic: "Language techniques",
+    prompt: "A group of lines in a poem is a…",
+    answer: "stanza",
+    accepted: ["stanza", "a stanza"],
+    choices: ["stanza", "noun", "caption", "index"],
+    explain: "Stanzas organise a poem, as paragraphs organise prose.",
+  },
+  {
+    id: "e15",
+    topic: "Narrative",
+    prompt: "The writer’s attitude towards the subject is the…",
+    answer: "tone",
+    accepted: ["tone", "the tone"],
+    choices: ["tone", "setting", "rhyme", "plot"],
+    explain: "Tone might be bitter, hopeful, mocking, tender.",
+  },
 ];
+
+export const ENG_VOCAB = [
+  { id: "ev1", term: "simile", meaning: "comparison using like or as", topic: "Language techniques" },
+  { id: "ev2", term: "metaphor", meaning: "saying one thing is another", topic: "Language techniques" },
+  { id: "ev3", term: "alliteration", meaning: "repeated starting sounds", topic: "Language techniques" },
+  { id: "ev4", term: "personification", meaning: "human qualities given to non-human things", topic: "Language techniques" },
+  { id: "ev5", term: "onomatopoeia", meaning: "a word that imitates a sound", topic: "Language techniques" },
+  { id: "ev6", term: "hyperbole", meaning: "deliberate exaggeration", topic: "Language techniques" },
+  { id: "ev7", term: "stanza", meaning: "a group of lines in a poem", topic: "Writing" },
+  { id: "ev8", term: "tone", meaning: "the writer’s attitude", topic: "Narrative" },
+  { id: "ev9", term: "mood", meaning: "the feeling created for the reader", topic: "Narrative" },
+  { id: "ev10", term: "climax", meaning: "the turning point of a plot", topic: "Narrative" },
+  { id: "ev11", term: "noun", meaning: "a naming word", topic: "Word classes" },
+  { id: "ev12", term: "verb", meaning: "a doing or being word", topic: "Word classes" },
+  { id: "ev13", term: "adjective", meaning: "a describing word", topic: "Word classes" },
+  { id: "ev14", term: "protagonist", meaning: "the main character", topic: "Narrative" },
+  { id: "ev15", term: "imagery", meaning: "language that appeals to the senses", topic: "Language techniques" },
+];
+
+export const ENG_PAIRS = ENG_VOCAB.map((item) => ({ left: item.term, right: item.meaning }));
+
+export const ENG_GAMES = [
+  { id: "word-match", name: "Word Match", kicker: "Terms", blurb: "Match the technique to its meaning.", levels: 6 },
+] as const;
+

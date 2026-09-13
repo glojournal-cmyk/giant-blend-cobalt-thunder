@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router'
+import { playCorrect, setMusicEnabled, unlockAudio } from "@/lib/audio";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -131,9 +132,32 @@ function ScholarPage() {
           <label className="flex items-center justify-between gap-4">
             <span>
               <span className="block font-medium">Sound</span>
-              <span className="text-sm text-muted">Short chimes on answers and completed sessions.</span>
+              <span className="text-sm text-muted">Chimes for answers, dress-up, watering and PE.</span>
             </span>
-            <Switch checked={store.sound} onCheckedChange={store.setSound} />
+            <Switch
+              checked={store.sound}
+              onCheckedChange={(on) => {
+                store.setSound(on);
+                if (on) {
+                  unlockAudio();
+                  playCorrect();
+                }
+              }}
+            />
+          </label>
+          <label className="flex items-center justify-between gap-4">
+            <span>
+              <span className="block font-medium">Music</span>
+              <span className="text-sm text-muted">A quiet garden loop while you study.</span>
+            </span>
+            <Switch
+              checked={store.music}
+              onCheckedChange={(on) => {
+                store.setMusic(on);
+                unlockAudio();
+                setMusicEnabled(on);
+              }}
+            />
           </label>
           <p className="text-sm text-muted">
             This garden lives in your browser. Clearing site data will reset XP, reviews, outfits and the plant.

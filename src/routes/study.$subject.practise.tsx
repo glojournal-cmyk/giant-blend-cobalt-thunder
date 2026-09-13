@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { hasDictation, questionsFor, topicsFor } from "@/lib/content/banks";
 import { LATIN_VOCAB } from "@/lib/content/latin";
 import { FRENCH_VOCAB } from "@/lib/content/french";
+import { ENG_VOCAB } from "@/lib/content/english";
 import { subjectById } from "@/lib/content/subjects";
 import type { SubjectId } from "@/lib/content/subjects";
 import { dueReviewCount, useScholar } from "@/lib/store";
@@ -23,8 +24,9 @@ function PractisePage() {
   const [topic, setTopic] = useState<string>("all");
   const reviews = useScholar((s) => s.reviews);
   const seenCorrect = useScholar((s) => s.seenCorrect);
-  const all = questionsFor(subject);
-  const topics = topicsFor(subject);
+  const year = useScholar((s) => s.year);
+  const all = questionsFor(subject, year);
+  const topics = topicsFor(subject, year);
   const due = dueReviewCount(reviews);
   const today = todayKey();
 
@@ -53,7 +55,7 @@ function PractisePage() {
     ...(dictation
       ? [
           { id: "dictation" as const, label: "Dictation · 默生字", hint: "Spell every learned word" },
-          { id: "vocab" as const, label: "Vocab Bank", hint: `${subject === "latin" ? LATIN_VOCAB.length : FRENCH_VOCAB.length} words` },
+          { id: "vocab" as const, label: "Vocab Bank", hint: `${subject === "latin" ? LATIN_VOCAB.length : subject === "french" ? FRENCH_VOCAB.length : ENG_VOCAB.length} words` },
         ]
       : []),
     { id: "quick", label: "Quick 8", hint: "~5 minutes" },
@@ -71,20 +73,56 @@ function PractisePage() {
       </p>
       <header>
         <h1 className="font-display text-4xl font-semibold">{meta.name} · Practise</h1>
-        <p className="mt-2 text-muted">Small steps in a dead language still count. Choose a row, then begin.</p>
+        <p className="mt-2 text-muted">
+          {dictation
+            ? "Pick a mode — dictation 默生字 and the full vocab bank live here."
+            : "Choose a row, then begin."}
+        </p>
       </header>
-      <div className="flex flex-wrap gap-2">
-        {chips.map((chip) => (
-          <button
-            key={chip.id}
-            type="button"
-            onClick={() => setMode(chip.id)}
-            className={`rounded-xl px-3 py-2 text-left ${mode === chip.id ? "bg-navy text-card" : "bg-card ring-1 ring-line hover:bg-sage"}`}
-          >
-            <span className="block text-sm font-medium">{chip.label}</span>
-            <span className={`block text-[11px] ${mode === chip.id ? "text-card/70" : "text-muted"}`}>{chip.hint}</span>
-          </button>
-        ))}
+
+      <div className="space-y-3">
+        <div>
+          <p className="mb-1.5 text-[11px] font-semibold tracking-[0.16em] text-navy uppercase">Mode</p>
+          <div className="flex flex-wrap gap-2">
+            {chips
+              .filter((chip) => ["topic", "mixed", "weak", "due"].includes(chip.id))
+              .map((chip) => (
+                <ModeChip key={chip.id} chip={chip} active={mode === chip.id} onPick={setMode} />
+              ))}
+          </div>
+        </div>
+        {dictation ? (
+          <div>
+            <p className="mb-1.5 text-[11px] font-semibold tracking-[0.16em] text-navy uppercase">Words · 生字</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {chips
+                .filter((chip) => chip.id === "dictation" || chip.id === "vocab")
+                .map((chip) => (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    onClick={() => setMode(chip.id)}
+                    className={`min-h-16 rounded-xl px-4 py-3 text-left ${
+                      mode === chip.id ? "bg-navy text-card" : "bg-blush/80 ring-1 ring-line hover:bg-blush"
+                    }`}
+                  >
+                    <span className="block font-display text-xl font-semibold">{chip.label}</span>
+                    <span className={`block text-xs ${mode === chip.id ? "text-card/70" : "text-muted"}`}>{chip.hint}</span>
+                  </button>
+                ))}
+            </div>
+          </div>
+        ) : null}
+        <div>
+          <p className="mb-1.5 text-[11px] font-semibold tracking-[0.16em] text-navy uppercase">Length</p>
+          <div className="flex flex-wrap gap-2">
+            {chips
+              .filter((chip) => ["quick", "balanced", "challenge"].includes(chip.id))
+              .map((chip) => (
+                <ModeChip key={chip.id} chip={chip} active={mode === chip.id} onPick={setMode} />
+              ))}
+          </div>
+        </div>
       </div>
       {(mode === "topic" || mode === "dictation") && topics.length ? (
         <div className="flex flex-wrap gap-2">
@@ -110,7 +148,7 @@ function PractisePage() {
 
       {mode === "dictation" && dictation ? (
         <Dictation
-          lang={subject as "latin" | "french"}
+          lang={subject as "latin" | "french" | "english"}
           topic={topic === "all" ? undefined : topic}
           size={size}
           backHref={`/study/${subject}`}
@@ -120,7 +158,7 @@ function PractisePage() {
           <h2 className="font-display text-2xl font-semibold">Every word you have been taught</h2>
           <p className="mt-1 text-sm text-muted">Search, filter, then use Dictation to spell them.</p>
           <div className="mt-4">
-            <VocabBank lang={subject as "latin" | "french"} />
+            <VocabBank lang={subject as "latin" | "french" | "english"} />
           </div>
         </Card>
       ) : (
@@ -138,3 +176,25 @@ function PractisePage() {
     </div>
   );
 }
+
+function ModeChip({
+  chip,
+  active,
+  onPick,
+}: {
+  chip: { id: Mode; label: string; hint: string };
+  active: boolean;
+  onPick: (id: Mode) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onPick(chip.id)}
+      className={`rounded-xl px-3 py-2 text-left ${active ? "bg-navy text-card" : "bg-card ring-1 ring-line hover:bg-sage"}`}
+    >
+      <span className="block text-sm font-medium">{chip.label}</span>
+      <span className={`block text-[11px] ${active ? "text-card/70" : "text-muted"}`}>{chip.hint}</span>
+    </button>
+  );
+}
+

@@ -26,8 +26,9 @@ function ProgressPage() {
   const seenTotal = useScholar((s) => s.seenTotal);
   const reviews = useScholar((s) => s.reviews);
   const activity = useScholar((s) => s.activity);
-  const questions = questionsFor(subject);
-  const topics = topicsFor(subject);
+  const year = useScholar((s) => s.year);
+  const questions = questionsFor(subject, year);
+  const topics = topicsFor(subject, year);
   const attempted = questions.filter((q) => (seenTotal[q.id] ?? 0) > 0);
   const mastered = questions.filter((q) => (seenCorrect[q.id] ?? 0) >= 2);
   const overall = questions.length ? Math.round((mastered.length / questions.length) * 100) : 0;
