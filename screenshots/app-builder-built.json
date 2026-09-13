@@ -1,0 +1,38 @@
+{
+  "url": "http://127.0.0.1:8081/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Lux et Labor — The Scholar’s Garden",
+      "hasCanvas": false,
+      "bodyTextLen": 693,
+      "bodyTextHash": "a5f63b3e8d61f1c0297c3fcf706ef1762b216f5303f9280da831e1437f3c5745",
+      "bodyTextPrefix": "Lux et Labor The Scholar’s Garden Lv 1 0 XP Home Study Garden Sc",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Lux et Labor — The Scholar’s Garden",
+      "hasCanvas": false,
+      "bodyTextLen": 668,
+      "bodyTextHash": "9c2eaed07f2c4f64b8bb4eecc8193eb479dd98402f1fab4b719c8b5e1715d836",
+      "bodyTextPrefix": "Lux et Labor The Scholar’s Garden Lv 1 · 0 XP Search revision to",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-built.json",
+  "divergesFromBaseline": false,
+  "baselineReasons": []
+}

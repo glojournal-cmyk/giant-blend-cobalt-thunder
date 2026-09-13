@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Lux et Labor",
+      "hasCanvas": false,
+      "bodyTextLen": 559,
+      "bodyTextHash": "eec1926f67e7006f79d3351b3e72d804b7ec4ec5a1baf3f69a5adc6305cc9dc5",
+      "bodyTextPrefix": "Lux et Labor Raise your scholar Lv 1 0 XP Home Study Play Schola",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Lux et Labor",
+      "hasCanvas": false,
+      "bodyTextLen": 534,
+      "bodyTextHash": "14d2c7d43fbc2c680092255efab77a8452b009e6933c37963cda21c5784a70c5",
+      "bodyTextPrefix": "Lux et Labor Raise your scholar Lv 1 · 0 XP Search revision topi",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
