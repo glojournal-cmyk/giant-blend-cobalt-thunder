@@ -59,6 +59,42 @@ export const FRENCH_VOCAB: FrenchVocab[] = [
   { id: "fv30", french: "aujourd'hui", english: "today", topic: "Time", section: 6, spelling: true },
   { id: "fv31", french: "demain", english: "tomorrow", topic: "Time", section: 6, spelling: true },
   { id: "fv32", french: "le week-end", english: "the weekend", topic: "Time", section: 6, spelling: true },
+  { id: "fv33", french: "la ville", english: "the town / city", topic: "Town", section: 7, spelling: true },
+  { id: "fv34", french: "j'habite", english: "I live", topic: "Town", section: 7, spelling: true },
+  { id: "fv35", french: "il y a", english: "there is / there are", topic: "Town", section: 7, spelling: true },
+  { id: "fv36", french: "un magasin", english: "a shop", topic: "Town", section: 7, spelling: true },
+  { id: "fv37", french: "un café", english: "a café", topic: "Town", section: 7, spelling: true },
+  { id: "fv38", french: "un parc", english: "a park", topic: "Town", section: 7, spelling: true },
+  { id: "fv39", french: "une gare", english: "a station", topic: "Town", section: 7, spelling: true },
+  { id: "fv40", french: "un musée", english: "a museum", topic: "Town", section: 7, spelling: true },
+  { id: "fv41", french: "une église", english: "a church", topic: "Town", section: 7, spelling: true },
+  { id: "fv42", french: "on peut", english: "you can / one can", topic: "Town", section: 7, spelling: true },
+  { id: "fv43", french: "c'est", english: "it is", topic: "Town", section: 7, spelling: true },
+  { id: "fv44", french: "les gens", english: "people", topic: "Town", section: 7, spelling: true },
+  { id: "fv45", french: "le pain", english: "bread", topic: "Food", section: 8, spelling: true },
+  { id: "fv46", french: "le fromage", english: "cheese", topic: "Food", section: 8, spelling: true },
+  { id: "fv47", french: "l'eau", english: "water", topic: "Food", section: 8, spelling: true },
+  { id: "fv48", french: "manger", english: "to eat", topic: "Food", section: 8, spelling: true },
+  { id: "fv49", french: "boire", english: "to drink", topic: "Food", section: 8, spelling: true },
+  { id: "fv50", french: "le sport", english: "sport", topic: "Hobbies", section: 9, spelling: true },
+  { id: "fv51", french: "la musique", english: "music", topic: "Hobbies", section: 9, spelling: true },
+  { id: "fv52", french: "jouer", english: "to play", topic: "Hobbies", section: 9, spelling: true },
+  { id: "fv53", french: "regarder", english: "to watch", topic: "Hobbies", section: 9, spelling: true },
+  { id: "fv54", french: "lire", english: "to read", topic: "Hobbies", section: 9, spelling: true },
+  { id: "fv55", french: "et", english: "and", topic: "Connectives", section: 10, spelling: true },
+  { id: "fv56", french: "mais", english: "but", topic: "Connectives", section: 10, spelling: true },
+  { id: "fv57", french: "aussi", english: "also", topic: "Connectives", section: 10, spelling: true },
+  { id: "fv58", french: "cependant", english: "however", topic: "Connectives", section: 10, spelling: true },
+  { id: "fv59", french: "donc", english: "so / therefore", topic: "Connectives", section: 10, spelling: true },
+  { id: "fv60", french: "grand(e)", english: "big / tall", topic: "Opinions", section: 4, spelling: true },
+  { id: "fv61", french: "petit(e)", english: "small", topic: "Opinions", section: 4, spelling: true },
+  { id: "fv62", french: "joli(e)", english: "pretty", topic: "Opinions", section: 4, spelling: true },
+  { id: "fv63", french: "il fait beau", english: "the weather is fine", topic: "Time", section: 6, spelling: true },
+  { id: "fv64", french: "il pleut", english: "it is raining", topic: "Time", section: 6, spelling: true },
+  { id: "fv65", french: "hier", english: "yesterday", topic: "Time", section: 6, spelling: true },
+  { id: "fv66", french: "je vais", english: "I am going", topic: "Verbs", section: 5, spelling: true },
+  { id: "fv67", french: "j'ai visité", english: "I visited", topic: "Verbs", section: 5, spelling: true },
+  { id: "fv68", french: "sympa", english: "nice / kind", topic: "Opinions", section: 4, spelling: true },
 ];
 
 export const FRENCH_QUESTIONS: FrenchQuestion[] = [
@@ -170,6 +206,43 @@ export const FRENCH_QUESTIONS: FrenchQuestion[] = [
     explain: "être: je suis, tu es, il/elle est, nous sommes, vous êtes, ils/elles sont.",
     topic: "Verbs",
   },
+  {
+    id: "fq13",
+    prompt: "Translate into French: I live in a small city.",
+    answer: "J'habite dans une petite ville.",
+    accepted: [
+      "j'habite dans une petite ville",
+      "j habite dans une petite ville",
+      "jhabite dans une petite ville",
+      "j'habite dans une petite ville.",
+    ],
+    choices: [
+      "J'habite dans une petite ville.",
+      "Je vis dans un grand pays.",
+      "Il y a une petite ville.",
+      "J'aime la petite ville.",
+    ],
+    explain: "j'habite = I live. dans une petite ville = in a small town/city. ville is feminine so petite agrees.",
+    topic: "Town",
+  },
+  {
+    id: "fq14",
+    prompt: "il y a means:",
+    answer: "there is / there are",
+    accepted: ["there is", "there are", "there is / there are"],
+    choices: ["there is / there are", "I have", "it is", "you can"],
+    explain: "il y a introduces what exists in a place: Il y a un parc.",
+    topic: "Town",
+  },
+  {
+    id: "fq15",
+    prompt: "How do you say ‘because’?",
+    answer: "parce que",
+    accepted: ["parce que", "parceque"],
+    choices: ["mais", "parce que", "aussi", "donc"],
+    explain: "Use parce que to give a reason after an opinion.",
+    topic: "Connectives",
+  },
 ];
 
 export const FRENCH_WRITING: FrenchWriting[] = [
@@ -213,4 +286,26 @@ export const FRENCH_WRITING: FrenchWriting[] = [
     model:
       "Le week-end, je vais au parc avec mon frère. Demain je vais faire mes devoirs. Ensuite je vais regarder un film.",
   },
+  {
+    id: "w4",
+    title: "Décris ta ville",
+    prompt: "Write 80–100 words in French about your town or city. Include what there is, what you like (don’t like), and what people do there. Try to give opinions and reasons.",
+    sentences: 8,
+    requirements: [
+      "Write 80–100 words",
+      "Include a variety of vocabulary",
+      "Use at least one opinion + reason",
+      "Use different tenses (present and at least one other)",
+      "Use connectives",
+      "Check agreements (adjectives)",
+      "Use accurate spelling and punctuation",
+    ],
+    model:
+      "J'habite dans une petite ville près de la mer. C'est un endroit calme et agréable avec beaucoup de magasins, un beau parc et une vieille église. J'aime ma ville parce qu'il y a une bonne ambiance et les gens sont sympathiques. Le week-end on peut aller au café ou visiter le musée. Cependant, je n'aime pas les embouteillages. Hier j'ai visité le parc avec ma sœur.",
+  },
 ];
+
+export const FRENCH_GAMES = [
+  { id: "mot-match", name: "Mot Match", kicker: "Vocabulary", blurb: "Match French and English. Grow your word power.", levels: 6 },
+  { id: "phrase-mosaic", name: "Phrase Mosaic", kicker: "Sentences", blurb: "Build a French sentence from tiles.", levels: 6 },
+] as const;

@@ -19,6 +19,11 @@ import { Route as PlayGameRouteImport } from './routes/play.$game'
 import { Route as SessionKindRouteImport } from './routes/session.$kind'
 import { Route as StudyIndexRouteImport } from './routes/study.index'
 import { Route as StudySubjectRouteImport } from './routes/study.$subject'
+import { Route as StudySubjectIndexRouteImport } from './routes/study.$subject.index'
+import { Route as StudySubjectLearnRouteImport } from './routes/study.$subject.learn'
+import { Route as StudySubjectPlayRouteImport } from './routes/study.$subject.play'
+import { Route as StudySubjectPractiseRouteImport } from './routes/study.$subject.practise'
+import { Route as StudySubjectProgressRouteImport } from './routes/study.$subject.progress'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -70,6 +75,31 @@ const StudySubjectRoute = StudySubjectRouteImport.update({
   path: '/$subject',
   getParentRoute: () => StudyRoute,
 } as any)
+const StudySubjectIndexRoute = StudySubjectIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StudySubjectRoute,
+} as any)
+const StudySubjectLearnRoute = StudySubjectLearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
+  getParentRoute: () => StudySubjectRoute,
+} as any)
+const StudySubjectPlayRoute = StudySubjectPlayRouteImport.update({
+  id: '/play',
+  path: '/play',
+  getParentRoute: () => StudySubjectRoute,
+} as any)
+const StudySubjectPractiseRoute = StudySubjectPractiseRouteImport.update({
+  id: '/practise',
+  path: '/practise',
+  getParentRoute: () => StudySubjectRoute,
+} as any)
+const StudySubjectProgressRoute = StudySubjectProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => StudySubjectRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -79,9 +109,14 @@ export interface FileRoutesByFullPath {
   '/study': typeof StudyRouteWithChildren
   '/play/$game': typeof PlayGameRoute
   '/session/$kind': typeof SessionKindRoute
-  '/study/$subject': typeof StudySubjectRoute
+  '/study/$subject': typeof StudySubjectRouteWithChildren
   '/play/': typeof PlayIndexRoute
   '/study/': typeof StudyIndexRoute
+  '/study/$subject/learn': typeof StudySubjectLearnRoute
+  '/study/$subject/play': typeof StudySubjectPlayRoute
+  '/study/$subject/practise': typeof StudySubjectPractiseRoute
+  '/study/$subject/progress': typeof StudySubjectProgressRoute
+  '/study/$subject/': typeof StudySubjectIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -89,9 +124,13 @@ export interface FileRoutesByTo {
   '/scholar': typeof ScholarRoute
   '/play/$game': typeof PlayGameRoute
   '/session/$kind': typeof SessionKindRoute
-  '/study/$subject': typeof StudySubjectRoute
   '/play': typeof PlayIndexRoute
   '/study': typeof StudyIndexRoute
+  '/study/$subject/learn': typeof StudySubjectLearnRoute
+  '/study/$subject/play': typeof StudySubjectPlayRoute
+  '/study/$subject/practise': typeof StudySubjectPractiseRoute
+  '/study/$subject/progress': typeof StudySubjectProgressRoute
+  '/study/$subject': typeof StudySubjectIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -102,9 +141,14 @@ export interface FileRoutesById {
   '/study': typeof StudyRouteWithChildren
   '/play/$game': typeof PlayGameRoute
   '/session/$kind': typeof SessionKindRoute
-  '/study/$subject': typeof StudySubjectRoute
+  '/study/$subject': typeof StudySubjectRouteWithChildren
   '/play/': typeof PlayIndexRoute
   '/study/': typeof StudyIndexRoute
+  '/study/$subject/learn': typeof StudySubjectLearnRoute
+  '/study/$subject/play': typeof StudySubjectPlayRoute
+  '/study/$subject/practise': typeof StudySubjectPractiseRoute
+  '/study/$subject/progress': typeof StudySubjectProgressRoute
+  '/study/$subject/': typeof StudySubjectIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -119,6 +163,11 @@ export interface FileRouteTypes {
     | '/study/$subject'
     | '/play/'
     | '/study/'
+    | '/study/$subject/learn'
+    | '/study/$subject/play'
+    | '/study/$subject/practise'
+    | '/study/$subject/progress'
+    | '/study/$subject/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -126,9 +175,13 @@ export interface FileRouteTypes {
     | '/scholar'
     | '/play/$game'
     | '/session/$kind'
-    | '/study/$subject'
     | '/play'
     | '/study'
+    | '/study/$subject/learn'
+    | '/study/$subject/play'
+    | '/study/$subject/practise'
+    | '/study/$subject/progress'
+    | '/study/$subject'
   id:
     | '__root__'
     | '/'
@@ -141,6 +194,11 @@ export interface FileRouteTypes {
     | '/study/$subject'
     | '/play/'
     | '/study/'
+    | '/study/$subject/learn'
+    | '/study/$subject/play'
+    | '/study/$subject/practise'
+    | '/study/$subject/progress'
+    | '/study/$subject/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -224,6 +282,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudySubjectRouteImport
       parentRoute: typeof StudyRoute
     }
+    '/study/$subject/': {
+      id: '/study/$subject/'
+      path: '/'
+      fullPath: '/study/$subject/'
+      preLoaderRoute: typeof StudySubjectIndexRouteImport
+      parentRoute: typeof StudySubjectRoute
+    }
+    '/study/$subject/learn': {
+      id: '/study/$subject/learn'
+      path: '/learn'
+      fullPath: '/study/$subject/learn'
+      preLoaderRoute: typeof StudySubjectLearnRouteImport
+      parentRoute: typeof StudySubjectRoute
+    }
+    '/study/$subject/play': {
+      id: '/study/$subject/play'
+      path: '/play'
+      fullPath: '/study/$subject/play'
+      preLoaderRoute: typeof StudySubjectPlayRouteImport
+      parentRoute: typeof StudySubjectRoute
+    }
+    '/study/$subject/practise': {
+      id: '/study/$subject/practise'
+      path: '/practise'
+      fullPath: '/study/$subject/practise'
+      preLoaderRoute: typeof StudySubjectPractiseRouteImport
+      parentRoute: typeof StudySubjectRoute
+    }
+    '/study/$subject/progress': {
+      id: '/study/$subject/progress'
+      path: '/progress'
+      fullPath: '/study/$subject/progress'
+      preLoaderRoute: typeof StudySubjectProgressRouteImport
+      parentRoute: typeof StudySubjectRoute
+    }
   }
 }
 
@@ -239,13 +332,33 @@ const PlayRouteChildren: PlayRouteChildren = {
 
 const PlayRouteWithChildren = PlayRoute._addFileChildren(PlayRouteChildren)
 
+interface StudySubjectRouteChildren {
+  StudySubjectLearnRoute: typeof StudySubjectLearnRoute
+  StudySubjectPlayRoute: typeof StudySubjectPlayRoute
+  StudySubjectPractiseRoute: typeof StudySubjectPractiseRoute
+  StudySubjectProgressRoute: typeof StudySubjectProgressRoute
+  StudySubjectIndexRoute: typeof StudySubjectIndexRoute
+}
+
+const StudySubjectRouteChildren: StudySubjectRouteChildren = {
+  StudySubjectLearnRoute: StudySubjectLearnRoute,
+  StudySubjectPlayRoute: StudySubjectPlayRoute,
+  StudySubjectPractiseRoute: StudySubjectPractiseRoute,
+  StudySubjectProgressRoute: StudySubjectProgressRoute,
+  StudySubjectIndexRoute: StudySubjectIndexRoute,
+}
+
+const StudySubjectRouteWithChildren = StudySubjectRoute._addFileChildren(
+  StudySubjectRouteChildren,
+)
+
 interface StudyRouteChildren {
-  StudySubjectRoute: typeof StudySubjectRoute
+  StudySubjectRoute: typeof StudySubjectRouteWithChildren
   StudyIndexRoute: typeof StudyIndexRoute
 }
 
 const StudyRouteChildren: StudyRouteChildren = {
-  StudySubjectRoute: StudySubjectRoute,
+  StudySubjectRoute: StudySubjectRouteWithChildren,
   StudyIndexRoute: StudyIndexRoute,
 }
 

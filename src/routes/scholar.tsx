@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { WardrobeGame } from "@/components/wardrobe-game";
 import { COLLECTIBLES, MEDALS } from "@/lib/content/collectibles";
-import { DEFAULT_SCHOLAR_NAME, OUTFITS, type OutfitId } from "@/lib/content/outfits";
+import { DEFAULT_SCHOLAR_NAME, OUTFITS } from "@/lib/content/outfits";
 import { useScholar } from "@/lib/store";
 import { levelFromXp } from "@/lib/xp";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/scholar")({ component: ScholarPage });
 
@@ -17,7 +17,7 @@ function ScholarPage() {
   const store = useScholar();
   const { level, into, next } = levelFromXp(store.xp);
   const [name, setName] = useState(store.displayName);
-  const [tab, setTab] = useState<"wardrobe" | "profile" | "settings">("wardrobe");
+  const [tab, setTab] = useState<"wardrobe" | "collection" | "profile" | "settings">("wardrobe");
   const shownName = store.displayName.trim() || DEFAULT_SCHOLAR_NAME;
   const outfit = OUTFITS.find((item) => item.id === store.equippedOutfit) ?? OUTFITS[0];
 
@@ -26,9 +26,12 @@ function ScholarPage() {
       <header>
         <p className="text-xs font-semibold tracking-[0.22em] text-navy uppercase">Your scholar</p>
         <h1 className="font-display text-4xl font-semibold">{shownName}</h1>
-        <p className="mt-2 max-w-2xl text-muted">Wardrobe, medals and the work that earned them.</p>
+        <p className="mt-2 max-w-2xl text-muted">
+          {tab === "wardrobe" ? "Tap a garment in the closet — she changes at once." : "Wardrobe, medals and the work that earned them."}
+        </p>
       </header>
 
+      {tab !== "wardrobe" ? (
       <Card className="overflow-hidden p-0">
         <div className="grid md:grid-cols-[240px_1fr]">
           <img src={outfit.art} alt={`${shownName} in ${outfit.name}`} className="h-72 w-full object-cover object-[50%_12%] md:h-full" />
@@ -47,13 +50,17 @@ function ScholarPage() {
           </div>
         </div>
       </Card>
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         <Button variant={tab === "wardrobe" ? "default" : "secondary"} onClick={() => setTab("wardrobe")}>
           Wardrobe
         </Button>
+        <Button variant={tab === "collection" ? "default" : "secondary"} onClick={() => setTab("collection")}>
+          Collection
+        </Button>
         <Button variant={tab === "profile" ? "default" : "secondary"} onClick={() => setTab("profile")}>
-          Profile
+          Achievements
         </Button>
         <Button variant={tab === "settings" ? "default" : "secondary"} onClick={() => setTab("settings")}>
           Settings
@@ -61,37 +68,24 @@ function ScholarPage() {
       </div>
 
       {tab === "wardrobe" ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {OUTFITS.map((item) => {
-            const have = store.unlockedOutfits.includes(item.id);
-            const equipped = store.equippedOutfit === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                disabled={!have}
-                onClick={() => store.equipOutfit(item.id as OutfitId)}
-                className={cn(
-                  "overflow-hidden rounded-xl bg-card text-left shadow-[var(--shadow-border)] transition-transform duration-150 active:scale-[0.98]",
-                  have ? "hover:bg-sage" : "opacity-70",
-                  equipped && "ring-2 ring-navy",
-                )}
-              >
-                <img
-                  src={item.art}
-                  alt=""
-                  className={cn("h-56 w-full object-cover object-[50%_12%]", !have && "grayscale")}
-                />
-                <div className="p-3">
-                  <p className="font-medium">{item.name}</p>
-                  <p className="text-xs text-muted">{have ? item.blurb : item.need}</p>
-                  <p className="mt-1 text-xs font-medium tracking-wide text-navy uppercase">
-                    {equipped ? "Wearing" : have ? "Tap to wear" : "Locked"}
-                  </p>
-                </div>
-              </button>
-            );
-          })}
+        <WardrobeGame />
+      ) : tab === "collection" ? (
+        <div className="grid gap-3 sm:grid-cols-3">
+          {COLLECTIBLES.map((item) => (
+            <div key={item.id} className="overflow-hidden rounded-lg bg-sage/60">
+              <img
+                src={item.art}
+                alt=""
+                className={`h-32 w-full object-cover ${store.collectibles.includes(item.id) ? "" : "grayscale"}`}
+              />
+              <div className="p-3">
+                <p className="font-medium">{item.name}</p>
+                <p className="text-xs text-muted">
+                  {store.collectibles.includes(item.id) ? item.blurb : item.need}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       ) : tab === "profile" ? (
         <div className="grid gap-4 lg:grid-cols-2">
@@ -129,26 +123,6 @@ function ScholarPage() {
                 </li>
               ))}
             </ul>
-          </Card>
-          <Card className="p-5 lg:col-span-2">
-            <h3 className="font-display text-2xl font-semibold">Collection</h3>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              {COLLECTIBLES.map((item) => (
-                <div key={item.id} className="overflow-hidden rounded-lg bg-sage/60">
-                  <img
-                    src={item.art}
-                    alt=""
-                    className={`h-32 w-full object-cover ${store.collectibles.includes(item.id) ? "" : "grayscale"}`}
-                  />
-                  <div className="p-3">
-                    <p className="font-medium">{item.name}</p>
-                    <p className="text-xs text-muted">
-                      {store.collectibles.includes(item.id) ? item.blurb : item.need}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </Card>
         </div>
       ) : (

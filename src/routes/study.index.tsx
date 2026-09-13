@@ -1,95 +1,87 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { BookOpen, Gamepad2, LineChart, Pencil } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { ScriptQuote, VineCorner } from "@/components/vine";
+import { questionsFor, topicsFor } from "@/lib/content/banks";
+import { SUBJECTS } from "@/lib/content/subjects";
+import { useScholar } from "@/lib/store";
 
 export const Route = createFileRoute("/study/")({ component: StudyHub });
 
-const CURRENT = [
-  {
-    id: "latin",
-    name: "Latin",
-    kicker: "Year 9 · Current curriculum",
-    blurb: "Build fluency through short, focused sessions.",
-    art: "/art/latin.jpg",
-  },
-  {
-    id: "french",
-    name: "French",
-    kicker: "Year 9 · Current curriculum",
-    blurb: "Vocabulary, spelling and writing, with accents that count.",
-    art: "/art/french.jpg",
-  },
-];
-
-const FOUNDATION = [
-  {
-    id: "biology",
-    name: "Biology",
-    kicker: "Year 8 · Foundation consolidation",
-    blurb: "Cells, photosynthesis, digestion, respiration, ecosystems.",
-    art: "/art/biology.jpg",
-  },
-];
+const MODE_BTNS = [
+  { id: "learn", label: "Learn", tint: "bg-sky/80", icon: BookOpen },
+  { id: "practise", label: "Practise", tint: "bg-sage", icon: Pencil },
+  { id: "play", label: "Play", tint: "bg-blush", icon: Gamepad2 },
+  { id: "progress", label: "Progress", tint: "bg-lilac/70", icon: LineChart },
+] as const;
 
 function StudyHub() {
+  const seenCorrect = useScholar((s) => s.seenCorrect);
+  const seenTotal = useScholar((s) => s.seenTotal);
+
   return (
-    <div className="space-y-8">
-      <header className="max-w-2xl">
-        <p className="text-xs font-semibold tracking-[0.22em] text-navy uppercase">Discover · Practise · Make progress</p>
-        <h1 className="mt-2 font-display text-4xl font-semibold">Study Hub</h1>
-        <p className="mt-2 text-muted">
-          Choose a subject and continue your learning journey. Current Year 9 learning stays separate from Year 8
-          Foundation Review.
-        </p>
+    <div className="relative space-y-6">
+      <VineCorner className="pointer-events-none absolute -top-4 -left-2 hidden h-40 w-40 lg:block" />
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold tracking-[0.22em] text-navy uppercase">Discover · Practise · Make progress</p>
+          <h1 className="mt-2 font-display text-5xl font-semibold">Study Hub</h1>
+          <p className="mt-2 max-w-xl text-muted">Choose a subject and continue your learning journey.</p>
+        </div>
+        <ScriptQuote>Knowledge is a garden that always grows.</ScriptQuote>
       </header>
 
-      <section className="space-y-3">
-        <h2 className="text-xs font-semibold tracking-[0.18em] text-navy uppercase">Year 9 · Current curriculum</h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          {CURRENT.map((subject) => (
-            <SubjectCard key={subject.id} {...subject} />
-          ))}
-        </div>
-      </section>
+      <div className="flex flex-wrap gap-2">
+        <span className="rounded-full bg-navy px-4 py-1.5 text-sm text-card">Year 9 · Current learning</span>
+        <span className="rounded-full bg-card px-4 py-1.5 text-sm ring-1 ring-line">Year 8 · Foundation review</span>
+      </div>
 
-      <section className="space-y-3">
-        <h2 className="text-xs font-semibold tracking-[0.18em] text-navy uppercase">Year 8 · Foundation consolidation</h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          {FOUNDATION.map((subject) => (
-            <SubjectCard key={subject.id} {...subject} />
-          ))}
-        </div>
-      </section>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {SUBJECTS.map((subject) => {
+          const qs = questionsFor(subject.id);
+          const topics = topicsFor(subject.id);
+          const mastered = qs.filter((q) => (seenCorrect[q.id] ?? 0) > 0).length;
+          const pct = qs.length ? Math.round((mastered / qs.length) * 100) : 0;
+          const attempted = qs.filter((q) => (seenTotal[q.id] ?? 0) > 0).length;
+          return (
+            <Card key={subject.id} className="overflow-hidden p-0">
+              <Link to="/study/$subject" params={{ subject: subject.id }} className="block">
+                <img src={subject.art} alt="" className="h-32 w-full object-cover" />
+              </Link>
+              <div className="space-y-3 p-5">
+                <div>
+                  <h2 className="font-display text-2xl font-semibold">{subject.name}</h2>
+                  <p className="text-xs tracking-wide text-muted">{subject.tags.join(" · ")}</p>
+                  <p className="mt-2 italic text-navy">“{subject.quote}”</p>
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs text-muted">
+                    <span>{pct}% mastery</span>
+                    <span>
+                      {attempted}/{qs.length || topics.length} ready
+                    </span>
+                  </div>
+                  <Progress className="mt-1" value={pct} />
+                </div>
+                <div className="grid grid-cols-4 gap-1">
+                  {MODE_BTNS.map((mode) => (
+                    <Link
+                      key={mode.id}
+                      to={`/study/$subject/${mode.id}` as "/study/$subject/learn"}
+                      params={{ subject: subject.id }}
+                      className={`flex min-h-14 flex-col items-center justify-center rounded-lg ${mode.tint} text-[11px] font-medium`}
+                    >
+                      <mode.icon className="mb-0.5 size-3.5" />
+                      {mode.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
     </div>
-  );
-}
-
-function SubjectCard({
-  id,
-  name,
-  kicker,
-  blurb,
-  art,
-}: {
-  id: string;
-  name: string;
-  kicker: string;
-  blurb: string;
-  art: string;
-}) {
-  return (
-    <Link to="/study/$subject" params={{ subject: id }} className="group block">
-      <Card className="overflow-hidden p-0 transition-transform duration-200 group-hover:-translate-y-0.5">
-        <img src={art} alt="" className="h-40 w-full object-cover" />
-        <div className="flex items-end justify-between gap-3 p-5">
-          <div>
-            <p className="text-xs tracking-[0.16em] text-navy uppercase">{kicker}</p>
-            <h3 className="font-display text-2xl font-semibold">{name}</h3>
-            <p className="mt-1 text-sm text-muted">{blurb}</p>
-          </div>
-          <ArrowRight className="mb-1 size-4 shrink-0 text-navy" />
-        </div>
-      </Card>
-    </Link>
   );
 }

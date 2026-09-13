@@ -20,9 +20,9 @@ export function CharacterStage({
       <img
         src={outfit.art}
         alt={`${label} in ${outfit.name}`}
-        className="scholar-idle mx-auto block max-h-[min(78vh,860px)] w-full object-contain outline-none"
+        className="scholar-idle mx-auto block max-h-[min(78vh,820px)] w-auto max-w-full object-contain outline-none"
       />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-navy via-navy/55 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[38%] bg-gradient-to-t from-navy via-navy/50 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 space-y-3 p-4 text-card sm:p-6">
         <p className="text-xs font-semibold tracking-[0.22em] text-card/70 uppercase">Lux et Labor · Raise your scholar</p>
         <div className="flex items-end justify-between gap-3">

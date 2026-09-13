@@ -1,4 +1,5 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { Dictation } from "@/components/dictation";
 import { QuizSession } from "@/components/quiz-session";
 import { SpellingWorkshop } from "@/components/spelling-workshop";
 import { TeacherNotes } from "@/components/teacher-notes";
@@ -63,6 +64,12 @@ function SessionPage() {
     );
   }
   if (kind === "latin-notes") return <TeacherNotes />;
+  if (kind === "latin-dictation") {
+    return <Dictation lang="latin" backHref="/study/latin/practise" />;
+  }
+  if (kind === "french-dictation") {
+    return <Dictation lang="french" backHref="/study/french/practise" />;
+  }
   if (kind === "french-practice") {
     return (
       <QuizSession

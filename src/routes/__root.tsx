@@ -13,7 +13,7 @@ export const Route = createRootRoute({
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: APP_NAME },
       { name: "theme-color", content: "#0e344d" },
-      { name: "description", content: "Raise a Tiffin scholar through study, PE and mini games. Unlock outfits, medals and a walled garden." },
+      { name: "description", content: "Raise a scholar through study, PE and mini games. Unlock outfits, medals and a walled garden." },
     ],
     links: [
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },

@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Gamepad2, Home, Landmark, UserRound } from "lucide-react";
+import { Gamepad2, Home, Landmark, Sprout, UserRound } from "lucide-react";
 import { Toaster } from "sonner";
 import { SearchDialog } from "@/components/search-dialog";
 import { unlockAudio } from "@/lib/audio";
@@ -12,6 +12,7 @@ const NAV = [
   { to: "/", label: "Home", icon: Home },
   { to: "/study", label: "Study", icon: Landmark },
   { to: "/play", label: "Play", icon: Gamepad2 },
+  { to: "/garden", label: "Garden", icon: Sprout },
   { to: "/scholar", label: "Scholar", icon: UserRound },
 ] as const;
 
@@ -85,7 +86,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-5 lg:px-8 lg:pb-10 lg:pt-8">{children}</main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-line bg-card/95 px-1 py-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line bg-card/95 px-1 py-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] lg:hidden">
         {NAV.map((item) => (
           <Link
             key={item.to}

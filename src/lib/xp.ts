@@ -13,6 +13,8 @@ export const XP_RULES = {
   writing_complete: 20,
   weak_area_complete: 8,
   pe_complete: 24,
+  lesson_complete: 12,
+  garden_water: 10,
 } as const;
 
 export type XpEvent = keyof typeof XP_RULES;
@@ -42,29 +44,29 @@ export const GARDEN_MILESTONES = [
   {
     stage: 1,
     min: 0,
-    name: "Seedling",
-    copy: "The first signs of your study habit are taking root.",
+    name: "Herb Garden",
+    copy: "A cozy beginning, where curiosity takes root.",
     art: "/art/garden-1.jpg",
   },
   {
     stage: 2,
     min: 400,
-    name: "Young Growth",
-    copy: "Regular learning has grown a stronger, leafier plant.",
+    name: "Courtyard",
+    copy: "Paths open. The garden starts to feel like home.",
     art: "/art/garden-2.jpg",
   },
   {
     stage: 3,
     min: 1000,
-    name: "Budding",
-    copy: "Your Garden is established and preparing to bloom.",
+    name: "Stone Fountain",
+    copy: "A place for deeper thoughts and brighter ideas.",
     art: "/art/garden-3.jpg",
   },
   {
     stage: 4,
     min: 2200,
-    name: "In Bloom",
-    copy: "A flourishing Scholar Garden grown through sustained study.",
+    name: "Conservatory",
+    copy: "A flourishing Scholar’s Garden, grown through sustained study.",
     art: "/art/garden-4.jpg",
   },
 ] as const;

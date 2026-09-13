@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PE_GAME } from "@/components/games/pe-circuit";
 import { Card } from "@/components/ui/card";
+import { FRENCH_GAMES } from "@/lib/content/french";
 import { LATIN_GAMES } from "@/lib/content/latin";
 import { useScholar } from "@/lib/store";
 
@@ -40,6 +41,26 @@ function PlayHub() {
         <h2 className="text-xs font-semibold tracking-[0.18em] text-navy uppercase">Latin games</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {LATIN_GAMES.map((game) => {
+            const progress = games[game.id];
+            return (
+              <Link key={game.id} to="/play/$game" params={{ game: game.id }} className="group">
+                <Card className="h-full p-4 transition-colors group-hover:bg-sage">
+                  <p className="text-xs tracking-[0.16em] text-navy uppercase">{game.kicker}</p>
+                  <p className="font-display text-xl font-semibold">{game.name}</p>
+                  <p className="mt-1 text-sm text-muted">{game.blurb}</p>
+                  <p className="mt-3 text-xs tabular-nums text-muted">
+                    Lv {progress?.unlocked ?? 1}/6 · {progress?.points ?? 0} pts
+                  </p>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+      <section className="space-y-3">
+        <h2 className="text-xs font-semibold tracking-[0.18em] text-navy uppercase">French games</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {FRENCH_GAMES.map((game) => {
             const progress = games[game.id];
             return (
               <Link key={game.id} to="/play/$game" params={{ game: game.id }} className="group">

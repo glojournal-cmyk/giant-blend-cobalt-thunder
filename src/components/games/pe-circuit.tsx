@@ -376,8 +376,7 @@ function CadenceStation({
       const until = beatAt.current - now;
       const phase = 1 - Math.min(1, Math.max(0, until / interval));
       setPulse(0.92 + Math.sin(phase * Math.PI) * 0.1);
-      if (now >= beatAt.current + interval * 0.48 && beatIndex.current < beats) {
-        // auto-advance missed beat
+      if (now >= beatAt.current + interval * 0.72 && beatIndex.current < beats) {
         const missedFor = beatIndex.current;
         if (errors.current.length === missedFor) {
           errors.current.push(1);
@@ -414,7 +413,7 @@ function CadenceStation({
     if (done.current || beatIndex.current >= beats) return;
     const now = performance.now();
     const delta = Math.abs(now - beatAt.current) / interval;
-    const err = Math.min(1, delta);
+    const err = Math.min(1, delta / 0.72);
     errors.current.push(err);
     if (err < 0.28) {
       if (sound) playCorrect();

@@ -4,54 +4,53 @@ export type Collectible = {
   blurb: string;
   art: string;
   need: string;
+  kind: "Books" | "Plants" | "Artefacts" | "Keepsakes" | "Tools" | "Garden";
 };
 
 export const COLLECTIBLES: Collectible[] = [
-  {
-    id: "ink-pot",
-    name: "Ink Pot",
-    blurb: "A scholar’s first tool.",
-    art: "/art/ink-pot.jpg",
-    need: "40 XP",
-  },
-  {
-    id: "study-books",
-    name: "Study Books",
-    blurb: "A small working library.",
-    art: "/art/books.jpg",
-    need: "250 XP",
-  },
-  {
-    id: "scholars-globe",
-    name: "Scholar’s Globe",
-    blurb: "Latin and French, side by side.",
-    art: "/art/globe.jpg",
-    need: "300 Latin XP and 300 French XP",
-  },
+  { id: "garden-within", name: "The Garden Within", blurb: "Find beauty in steady progress.", art: "/art/items/garden-within.jpg", need: "40 XP", kind: "Books" },
+  { id: "riviere-notes", name: "Rivière Notes", blurb: "Ideas flow further together.", art: "/art/books.jpg", need: "120 XP", kind: "Books" },
+  { id: "lunar-bloom", name: "Lunar Bloom", blurb: "A rare flower that blooms under moonlight.", art: "/art/items/lunar-bloom.jpg", need: "Study 3 days", kind: "Plants" },
+  { id: "lily-renewal", name: "Lily of Renewal", blurb: "A symbol of fresh beginnings.", art: "/art/items/herb.jpg", need: "200 XP", kind: "Plants" },
+  { id: "compass", name: "Scholar’s Compass", blurb: "For those who seek a clearer direction.", art: "/art/items/compass.jpg", need: "Complete 20 questions", kind: "Artefacts" },
+  { id: "celestial-globe", name: "Celestial Globe", blurb: "A map for bigger dreams.", art: "/art/items/celestial-globe.jpg", need: "300 Latin XP and 200 French XP", kind: "Artefacts" },
+  { id: "pressed", name: "Pressed Memories", blurb: "Small moments, kept forever.", art: "/art/items/pressed.jpg", need: "Water the garden", kind: "Keepsakes" },
+  { id: "midnight-ink", name: "Midnight Ink", blurb: "For thoughts worth keeping.", art: "/art/items/midnight-ink.jpg", need: "Complete a writing task", kind: "Tools" },
+  { id: "bench", name: "Wooden Bench", blurb: "A quiet place to think.", art: "/art/items/bench.jpg", need: "80 XP", kind: "Garden" },
+  { id: "herb", name: "Potted Herb", blurb: "Basil — curiosity takes root.", art: "/art/items/herb.jpg", need: "Starter", kind: "Garden" },
+  { id: "lantern", name: "Garden Lantern", blurb: "Lights the way.", art: "/art/items/lantern.jpg", need: "150 XP", kind: "Garden" },
+  { id: "cat-companion", name: "Cat Companion", blurb: "A cozy friend.", art: "/art/cat.jpg", need: "Play a game", kind: "Garden" },
+  { id: "bookshelf", name: "Bookshelf", blurb: "For growing minds.", art: "/art/items/bookshelf.jpg", need: "250 XP", kind: "Garden" },
+  { id: "roses", name: "White Roses", blurb: "Symbol of new beginnings.", art: "/art/items/roses.jpg", need: "Garden stage 2", kind: "Garden" },
+  { id: "fountain", name: "Stone Fountain", blurb: "A place for deeper thoughts.", art: "/art/items/fountain.jpg", need: "Reach garden stage 3", kind: "Garden" },
 ];
 
 export type Medal = {
   id: string;
   name: string;
   blurb: string;
+  group: "Academic" | "Streaks" | "Garden" | "Games" | "Special";
+  target: number;
 };
 
 export const MEDALS: Medal[] = [
-  { id: "first-steps", name: "First Steps", blurb: "Reach 100 Scholar XP." },
-  { id: "daily-disciplina", name: "Disciplina", blurb: "Study on 7 different days." },
-  { id: "latin-scholar", name: "Latin Scholar", blurb: "Earn 200 Latin XP." },
-  { id: "french-scholar", name: "French Scholar", blurb: "Earn 200 French XP." },
-  { id: "polyglot", name: "Polyglot", blurb: "Earn 150 Latin XP and 150 French XP." },
-  { id: "first-circuit", name: "First Circuit", blurb: "Complete a PE session on the quad." },
-  { id: "three-looks", name: "Three Looks", blurb: "Unlock three outfits." },
-  { id: "body-trained", name: "Trained", blurb: "Earn 80 Body XP from exercise." },
-  { id: "full-wardrobe", name: "Full Wardrobe", blurb: "Unlock every outfit." },
+  { id: "first-steps", name: "First Steps", blurb: "Complete your first study session.", group: "Academic", target: 1 },
+  { id: "study-streak", name: "Study Streak", blurb: "Study for 7 days in a row.", group: "Streaks", target: 7 },
+  { id: "garden-lover", name: "Garden Lover", blurb: "Tend the garden 5 times.", group: "Garden", target: 5 },
+  { id: "language-star", name: "Language Star", blurb: "Complete 50 language exercises.", group: "Academic", target: 50 },
+  { id: "latin-explorer", name: "Latin Explorer", blurb: "Answer 10 Latin questions.", group: "Academic", target: 10 },
+  { id: "french-explorer", name: "French Explorer", blurb: "Answer 10 French questions.", group: "Academic", target: 10 },
+  { id: "scholar-spirit", name: "Scholar Spirit", blurb: "Log in for 30 days total.", group: "Streaks", target: 30 },
+  { id: "brighter-you", name: "A Brighter You", blurb: "Reach Scholar Level 10.", group: "Special", target: 10 },
 ];
 
 export const QUOTES = [
   "Knowledge is a garden that always grows.",
-  "Lux et labor — light, and the work that holds it.",
   "Small steps today, a brighter tomorrow.",
-  "The plant follows the study, not the other way around.",
-  "Mastery stays academic. The garden is for the habit.",
+  "Discipline today, freedom tomorrow.",
+  "Progress, not perfection.",
+  "The best things in life are built, not given.",
+  "A different language is a different vision of life.",
+  "Little by little, much becomes possible.",
+  "Progress looks good on you.",
 ];

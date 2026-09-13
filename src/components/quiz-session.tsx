@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { playComplete, playCorrect, playWrong } from "@/lib/audio";
 import { useScholar } from "@/lib/store";
 import { linkFromHref } from "@/lib/nav";
+import type { SubjectId } from "@/lib/content/subjects";
 import { foldFrenchLoose, foldLatin, shuffle } from "@/lib/utils";
 
 export type QuizItem = {
@@ -27,20 +28,22 @@ export function QuizSession({
   dailyId,
   fold = "latin",
   backHref,
+  size = 8,
 }: {
   title: string;
   kicker: string;
   items: QuizItem[];
-  subject: "latin" | "french" | "biology";
+  subject: SubjectId;
   dailyId?: string;
   fold?: "latin" | "french";
   backHref: string;
+  size?: number;
 }) {
   const sound = useScholar((s) => s.sound);
   const recordAttempt = useScholar((s) => s.recordAttempt);
   const bumpDaily = useScholar((s) => s.bumpDaily);
   const award = useScholar((s) => s.award);
-  const deck = useMemo(() => shuffle(items).slice(0, Math.min(8, items.length)), [items]);
+  const deck = useMemo(() => shuffle(items).slice(0, Math.min(size, items.length)), [items, size]);
   const [index, setIndex] = useState(0);
   const [typed, setTyped] = useState("");
   const [mode, setMode] = useState<"choice" | "type">("choice");
@@ -100,14 +103,12 @@ export function QuizSession({
     const pct = Math.round((score / total) * 100);
     return (
       <Card className="p-6 sm:p-8">
-        <p className="text-xs tracking-[0.18em] text-navy uppercase">{kicker}</p>
-        <h1 className="mt-1 font-display text-4xl font-semibold">Session complete</h1>
+        <p className="font-script text-2xl text-script">Great work!</p>
+        <h1 className="mt-1 font-display text-4xl font-semibold">Well done!</h1>
         <p className="mt-3 text-lg">
           {score} / {total} · {pct}%
         </p>
-        <p className="mt-2 max-w-md text-muted">
-          Formal mastery stays academic. Scholar XP is awarded separately, and the garden grows from the habit.
-        </p>
+        <p className="mt-2 max-w-md text-muted">Every correct answer is a step towards a brighter you.</p>
         <div className="mt-6 flex flex-wrap gap-2">
           <Button asChild>
             <Link {...linkFromHref(backHref)}>Return</Link>
@@ -121,12 +122,12 @@ export function QuizSession({
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
+    <div className="space-y-4">
       <div>
         <p className="text-xs font-semibold tracking-[0.18em] text-navy uppercase">{kicker}</p>
         <h1 className="font-display text-3xl font-semibold">{title}</h1>
         <p className="mt-1 text-sm text-muted tabular-nums">
-          {index + 1} of {total}
+          Question {index + 1} / {total}
         </p>
         <Progress className="mt-3" value={((index + (verdict ? 1 : 0)) / total) * 100} />
       </div>
@@ -173,20 +174,33 @@ export function QuizSession({
               autoCorrect="off"
             />
             <Button type="submit" disabled={Boolean(verdict) || !typed.trim()}>
-              Check
+              Submit
             </Button>
           </form>
         )}
         {verdict && (
-          <div className="mt-5 rounded-lg bg-sage p-4 text-sm">
-            <p className="font-medium">{verdict.ok ? "Correct." : "Not yet."}</p>
-            <p className="mt-1 text-muted">
-              {item.answer}
-              {item.explain ? ` — ${item.explain}` : ""}
-            </p>
-            <Button className="mt-3" onClick={next}>
-              {index + 1 >= total ? "Finish" : "Continue"}
-            </Button>
+          <div className="mt-5 space-y-3">
+            <div className={`rounded-lg p-4 ${verdict.ok ? "bg-sage" : "bg-blush"}`}>
+              <p className="font-display text-2xl font-semibold">{verdict.ok ? "Well done!" : "Not quite."}</p>
+              <p className="mt-1 text-sm">You got it {verdict.ok ? "right" : "almost"}. Keep going!</p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-lg bg-sage p-4 text-sm">
+                <p className="text-xs tracking-[0.16em] text-navy uppercase">Your answer</p>
+                <p className="mt-1 font-medium">{verdict.given}</p>
+              </div>
+              <div className="rounded-lg bg-card p-4 text-sm ring-1 ring-line">
+                <p className="text-xs tracking-[0.16em] text-navy uppercase">Correct answer</p>
+                <p className="mt-1 font-medium">{item.answer}</p>
+              </div>
+            </div>
+            {item.explain ? (
+              <div className="rounded-lg bg-sky/70 p-4 text-sm">
+                <p className="text-xs tracking-[0.16em] text-navy uppercase">Why?</p>
+                <p className="mt-1 text-muted">{item.explain}</p>
+              </div>
+            ) : null}
+            <Button onClick={next}>{index + 1 >= total ? "Finish" : "Next question"}</Button>
           </div>
         )}
       </Card>

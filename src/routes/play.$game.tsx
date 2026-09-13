@@ -2,9 +2,11 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { FormaForge, ManuscriptMystery, SentenceMosaic, VerbumMatch } from "@/components/games/latin-games";
+import { MotMatch, PhraseMosaic } from "@/components/games/french-games";
 import { PE_GAME, PeCircuit } from "@/components/games/pe-circuit";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FRENCH_GAMES } from "@/lib/content/french";
 import { LATIN_GAMES } from "@/lib/content/latin";
 import { useScholar } from "@/lib/store";
 
@@ -13,7 +15,8 @@ export const Route = createFileRoute("/play/$game")({ component: PlayPage });
 function PlayPage() {
   const { game } = Route.useParams();
   const latinMeta = LATIN_GAMES.find((item) => item.id === game);
-  const meta = game === PE_GAME.id ? PE_GAME : latinMeta;
+  const frenchMeta = FRENCH_GAMES.find((item) => item.id === game);
+  const meta = game === PE_GAME.id ? PE_GAME : latinMeta ?? frenchMeta;
   const progress = useScholar((s) => s.games[game]);
   const [level, setLevel] = useState<number | null>(null);
 
@@ -27,6 +30,8 @@ function PlayPage() {
     if (game === "sentence-mosaic") return <SentenceMosaic level={level} />;
     if (game === "verbum-match") return <VerbumMatch level={level} />;
     if (game === "manuscript") return <ManuscriptMystery level={level} />;
+    if (game === "mot-match") return <MotMatch level={level} />;
+    if (game === "phrase-mosaic") return <PhraseMosaic level={level} />;
   }
 
   const unlocked = progress?.unlocked ?? 1;
@@ -69,11 +74,6 @@ function PlayPage() {
           );
         })}
       </div>
-      <p className="text-sm text-muted">
-        {game === PE_GAME.id
-          ? "Complete a circuit to raise Body XP and unlock kit."
-          : "Choose a level. Scoring uses game points and focus shields. Formal mastery is unchanged."}
-      </p>
     </div>
   );
 }
