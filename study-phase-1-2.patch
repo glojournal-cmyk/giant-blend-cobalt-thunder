@@ -1,0 +1,954 @@
+--- a/src/components/study-year-select.tsx
++++ b/src/components/study-year-select.tsx
+@@ -0,0 +1,26 @@
++import { ChevronDown } from "lucide-react";
++import { useScholar } from "@/lib/store";
++
++export function StudyYearSelect({ subjectName }: { subjectName?: string }) {
++  const year = useScholar((s) => s.year);
++  const setYear = useScholar((s) => s.setYear);
++
++  return (
++    <div className="flex flex-wrap items-center gap-2 text-sm">
++      {subjectName ? <span className="font-medium text-ink">{subjectName}</span> : null}
++      {subjectName ? <span className="text-line">·</span> : null}
++      <label className="relative inline-flex items-center">
++        <span className="sr-only">Study year</span>
++        <select
++          value={year}
++          onChange={(event) => setYear(Number(event.target.value) as 8 | 9)}
++          className="h-9 appearance-none rounded-full bg-card py-0 pr-8 pl-3 text-sm font-medium text-navy ring-1 ring-line outline-none transition hover:bg-sage focus:ring-2 focus:ring-navy/30"
++        >
++          <option value={9}>Year 9</option>
++          <option value={8}>Year 8 · Previous year revision</option>
++        </select>
++        <ChevronDown className="pointer-events-none absolute right-2.5 size-3.5 text-muted" />
++      </label>
++    </div>
++  );
++}
+--- a/src/routes/study.index.tsx
++++ b/src/routes/study.index.tsx
+@@ -1,150 +1,204 @@
+ import { createFileRoute, Link } from "@tanstack/react-router";
+-import { BookOpen, Gamepad2, LineChart, Pencil } from "lucide-react";
+-import { ScholarCompanion } from "@/components/scholar-companion";
++import { ArrowRight, BookOpen, Clock3, RotateCcw } from "lucide-react";
++import { useMemo } from "react";
++import { StudyYearSelect } from "@/components/study-year-select";
+ import { Card } from "@/components/ui/card";
+ import { Progress } from "@/components/ui/progress";
+-import { ScriptQuote, VineCorner } from "@/components/vine";
+ import { questionsFor, topicsFor } from "@/lib/content/banks";
+-import { SUBJECTS } from "@/lib/content/subjects";
+-import { useScholar } from "@/lib/store";
++import { lessonsFor } from "@/lib/content/lessons";
++import { SUBJECTS, type SubjectId } from "@/lib/content/subjects";
++import { useScholar, type ReviewItem } from "@/lib/store";
++import { todayKey } from "@/lib/utils";
+ 
+ export const Route = createFileRoute("/study/")({ component: StudyHub });
+-
+-const MODE_BTNS = [
+-  { id: "learn", label: "Learn", tint: "bg-sky/80", icon: BookOpen },
+-  { id: "practise", label: "Practise", tint: "bg-sage", icon: Pencil },
+-  { id: "play", label: "Play", tint: "bg-blush", icon: Gamepad2 },
+-  { id: "progress", label: "Progress", tint: "bg-lilac/70", icon: LineChart },
+-] as const;
+ 
+ function StudyHub() {
+   const seenCorrect = useScholar((s) => s.seenCorrect);
++  const seenTotal = useScholar((s) => s.seenTotal);
++  const reviews = useScholar((s) => s.reviews) as Record<string, ReviewItem>;
+   const lastSubject = useScholar((s) => s.lastSubject);
+-  const daily = useScholar((s) => s.daily);
++  const lastTopic = useScholar((s) => s.lastTopic);
+   const year = useScholar((s) => s.year);
+-  const setYear = useScholar((s) => s.setYear);
+-  const done = daily.filter((t) => t.progress >= t.target).length;
+-  const continueId = SUBJECTS.some((s) => s.id === lastSubject) ? lastSubject : "latin";
+-  const rec = SUBJECTS.find((s) => s.id === continueId) ?? SUBJECTS[0];
++  const today = todayKey();
++
++  const continueId = SUBJECTS.some((item) => item.id === lastSubject) ? (lastSubject as SubjectId) : "latin";
++  const continueSubject = SUBJECTS.find((item) => item.id === continueId) ?? SUBJECTS[0];
++  const continueQuestions = questionsFor(continueId, year);
++  const continueAttempts = continueQuestions.reduce((total, item) => total + (seenTotal[item.id] ?? 0), 0);
++  const continueCorrect = continueQuestions.reduce((total, item) => total + (seenCorrect[item.id] ?? 0), 0);
++  const continueScore = continueAttempts ? Math.round((continueCorrect / continueAttempts) * 100) : 0;
++  const continueLessons = lessonsFor(continueId);
++  const continueLesson =
++    continueLessons.find((item) => item.id === lastTopic) ??
++    continueLessons[0];
++  const continueTopic =
++    continueLesson?.title ??
++    topicsFor(continueId, year)[0]?.name ??
++    "Start your next topic";
++
++  const dueBySubject = useMemo(() => {
++    return SUBJECTS.map((subject) => {
++      const ids = new Set(questionsFor(subject.id, year).map((item) => item.id));
++      const due = Object.entries(reviews).filter(([id, item]) => ids.has(id) && item.due <= today).length;
++      return { subject, due };
++    }).filter((item) => item.due > 0);
++  }, [reviews, today, year]);
++
++  const frenchDue = dueBySubject.find((item) => item.subject.id === "french");
++  const firstDue = frenchDue ?? dueBySubject[0];
++
++  const todayRows = [
++    {
++      subject: continueSubject,
++      topic: continueTopic,
++      state: "Continue",
++      href: `/study/${continueId}/learn`,
++    },
++    {
++      subject: SUBJECTS.find((item) => item.id === "french")!,
++      topic: topicsFor("french", year)[0]?.name ?? "French review",
++      state: frenchDue ? `${frenchDue.due} due` : "Practise",
++      href: "/study/french/practise",
++    },
++    {
++      subject: SUBJECTS.find((item) => item.id === "biology")!,
++      topic: topicsFor("biology", year)[0]?.name ?? "Cell Structure",
++      state: seenTotal && Object.keys(seenTotal).some((id) => id.startsWith("bio")) ? "Continue" : "New",
++      href: "/study/biology/learn",
++    },
++  ];
+ 
+   return (
+-    <div className="relative space-y-6">
+-      <VineCorner className="pointer-events-none absolute -top-4 -left-2 hidden h-40 w-40 lg:block" />
+-      <header className="flex flex-wrap items-end justify-between gap-4">
++    <div className="space-y-8">
++      <header className="flex flex-wrap items-center justify-between gap-3">
+         <div>
+-          <p className="kicker">Discover · Practise · Make progress</p>
+-          <h1 className="mt-2 font-display text-5xl font-semibold tracking-tight">Study Hub</h1>
+-          <p className="mt-2 max-w-xl text-muted">Choose a subject. She’ll sit with you while you work.</p>
+-        </div>
+-        <ScholarCompanion compact line="Which subject today?" className="w-full max-w-sm" />
++          <p className="kicker">Your daily learning centre</p>
++          <h1 className="mt-1 font-display text-4xl font-semibold tracking-tight sm:text-5xl">Continue Learning</h1>
++        </div>
++        <StudyYearSelect />
+       </header>
+ 
+-      <div className="flex flex-wrap gap-2">
+-        <button
+-          type="button"
+-          onClick={() => setYear(9)}
+-          className={`min-h-10 rounded-full px-4 text-sm ${year === 9 ? "bg-navy text-card" : "bg-card shadow-[var(--shadow-border)]"}`}
+-        >
+-          Year 9 · Current learning
+-        </button>
+-        <button
+-          type="button"
+-          onClick={() => setYear(8)}
+-          className={`min-h-10 rounded-full px-4 text-sm ${year === 8 ? "bg-navy text-card" : "bg-card shadow-[var(--shadow-border)]"}`}
+-        >
+-          Year 8 · Foundation review
+-        </button>
+-      </div>
+-
+-      <div className="grid gap-4 md:grid-cols-2">
+-        <Card className="p-5">
+-          <p className="text-xs font-semibold tracking-[0.18em] text-navy uppercase">Recommended for you</p>
+-          <h2 className="mt-1 font-display text-2xl font-semibold">{rec.name}</h2>
+-          <p className="mt-1 text-sm text-muted">{year === 8 ? "Gentler review of the same topics." : rec.blurb}</p>
+-          <Link
+-            to="/study/$subject/practise"
+-            params={{ subject: rec.id }}
+-            className="mt-3 inline-flex rounded-full bg-navy px-4 py-2 text-sm text-card"
+-          >
+-            Continue {rec.name}
+-          </Link>
+-        </Card>
+-        <Card className="p-5">
+-          <p className="text-xs font-semibold tracking-[0.18em] text-navy uppercase">Today’s goals</p>
+-          <p className="mt-1 font-display text-2xl font-semibold">
+-            {done}/{daily.length} done
+-          </p>
+-          <ul className="mt-2 space-y-1 text-sm text-muted">
+-            {daily.slice(0, 3).map((task) => (
+-              <li key={task.id}>
+-                {task.progress >= task.target ? "✓" : "○"} {task.title}
+-              </li>
+-            ))}
+-          </ul>
+-        </Card>
+-      </div>
+-
+-      <Link to="/play" className="block">
++      <section className={`grid gap-4 ${firstDue ? "lg:grid-cols-[1.45fr_1fr]" : ""}`}>
+         <Card className="overflow-hidden p-0">
+-          <div className="grid sm:grid-cols-[160px_1fr]">
+-            <img src="/art/games/forma.jpg" alt="" className="h-28 w-full object-cover sm:h-full" />
+-            <div className="p-4">
+-              <p className="text-xs font-semibold tracking-[0.18em] text-navy uppercase">Mini games</p>
+-              <p className="font-display text-2xl font-semibold">Forma Forge, mosaics, match games</p>
+-              <p className="mt-1 text-sm text-muted">Latin, French, science and English — Play is on the main nav.</p>
++          <div className="grid min-h-64 sm:grid-cols-[1.2fr_0.8fr]">
++            <div className="flex flex-col justify-between p-6 sm:p-7">
++              <div>
++                <p className="text-xs font-semibold tracking-[0.18em] text-navy uppercase">
++                  {continueSubject.name} · Year {year}
++                </p>
++                <h2 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">{continueTopic}</h2>
++                <p className="mt-3 text-sm text-muted">
++                  {continueAttempts ? `Last session: ${continueScore}%` : "Ready when you are — start with a short focused lesson."}
++                </p>
++              </div>
++              <Link
++                to="/study/$subject/learn"
++                params={{ subject: continueId }}
++                className="mt-6 inline-flex w-fit items-center gap-2 rounded-full bg-navy px-5 py-2.5 text-sm font-medium text-card"
++              >
++                Continue <ArrowRight className="size-4" />
++              </Link>
+             </div>
++            <img src={continueSubject.art} alt="" className="h-48 w-full object-cover sm:h-full" />
+           </div>
+         </Card>
+-      </Link>
+-
+-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+-        {SUBJECTS.map((subject) => {
+-          const qs = questionsFor(subject.id, year);
+-          const topics = topicsFor(subject.id, year);
+-          const mastered = qs.filter((q) => (seenCorrect[q.id] ?? 0) > 0).length;
+-          const pct = qs.length ? Math.round((mastered / qs.length) * 100) : 0;
+-          const attempted = qs.filter((q) => (seenCorrect[q.id] ?? 0) > 0).length;
+-          return (
+-            <Card key={subject.id} className="overflow-hidden p-0 transition-transform duration-200 hover:-translate-y-0.5">
+-              <Link to="/study/$subject" params={{ subject: subject.id }} className="block">
+-                <img src={subject.art} alt="" className="h-36 w-full object-cover" />
+-              </Link>
+-              <div className="space-y-3 p-5">
+-                <div>
+-                  <h2 className="font-display text-2xl font-semibold">{subject.name}</h2>
+-                  <p className="text-xs tracking-wide text-muted">
+-                    Year {year} · {subject.tags.join(" · ")}
+-                  </p>
+-                  <p className="mt-2 italic text-navy">“{subject.quote}”</p>
++
++        {firstDue ? (
++          <Card className="flex min-h-64 flex-col justify-between bg-blush/70 p-6">
++            <div>
++              <div className="flex size-10 items-center justify-center rounded-full bg-card">
++                <RotateCcw className="size-5 text-navy" />
++              </div>
++              <p className="mt-5 text-xs font-semibold tracking-[0.18em] text-navy uppercase">Review due</p>
++              <h2 className="mt-1 font-display text-3xl font-semibold">{firstDue.subject.name} Review Due</h2>
++              <p className="mt-2 text-sm text-muted">
++                {firstDue.due} question{firstDue.due === 1 ? "" : "s"} from previous mistakes
++              </p>
++              <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
++                <Clock3 className="size-3.5" /> About {Math.max(3, Math.ceil(firstDue.due * 0.7))} min
++              </p>
++            </div>
++            <Link
++              to="/study/$subject/practise"
++              params={{ subject: firstDue.subject.id }}
++              className="mt-6 inline-flex w-fit items-center gap-2 rounded-full bg-navy px-4 py-2 text-sm font-medium text-card"
++            >
++              Review now <ArrowRight className="size-4" />
++            </Link>
++          </Card>
++        ) : null}
++      </section>
++
++      <section>
++        <div className="mb-3 flex items-end justify-between gap-3">
++          <div>
++            <h2 className="font-display text-3xl font-semibold">Today</h2>
++            <p className="text-sm text-muted">10–15 min recommended</p>
++          </div>
++        </div>
++        <Card className="divide-y divide-line overflow-hidden p-0">
++          {todayRows.map((row) => (
++            <Link
++              key={`${row.subject.id}-${row.topic}`}
++              to={row.href as "/study/$subject/learn"}
++              params={{ subject: row.subject.id }}
++              className="flex min-h-16 items-center justify-between gap-4 px-4 py-3 transition hover:bg-sage/60 sm:px-5"
++            >
++              <div className="min-w-0">
++                <p className="font-medium">{row.subject.name} — {row.topic}</p>
++                <p className="text-xs text-muted">Year {year}</p>
++              </div>
++              <span className="shrink-0 rounded-full bg-sage px-3 py-1 text-xs font-medium text-navy">{row.state}</span>
++            </Link>
++          ))}
++        </Card>
++      </section>
++
++      <section>
++        <div className="mb-4">
++          <h2 className="font-display text-3xl font-semibold">Subjects</h2>
++          <p className="text-sm text-muted">Learn, practise, review and see what is becoming secure.</p>
++        </div>
++        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
++          {SUBJECTS.map((subject) => {
++            const qs = questionsFor(subject.id, year);
++            const topics = topicsFor(subject.id, year);
++            const attempted = qs.filter((q) => (seenTotal[q.id] ?? 0) > 0);
++            const mastered = qs.filter((q) => (seenCorrect[q.id] ?? 0) >= 2);
++            const pct = qs.length ? Math.round((mastered.length / qs.length) * 100) : 0;
++            const ids = new Set(qs.map((item) => item.id));
++            const due = Object.entries(reviews).filter(([id, item]) => ids.has(id) && item.due <= today).length;
++            const topicProgress = topics.filter((topic) =>
++              qs.some((q) => (q.topic === topic.name || q.topic === topic.id) && (seenTotal[q.id] ?? 0) > 0),
++            ).length;
++
++            return (
++              <Card key={subject.id} className="overflow-hidden p-0">
++                <Link to="/study/$subject" params={{ subject: subject.id }} className="block">
++                  <img src={subject.art} alt="" className="h-32 w-full object-cover" />
++                </Link>
++                <div className="space-y-4 p-5">
++                  <div>
++                    <h3 className="font-display text-2xl font-semibold">{subject.name}</h3>
++                    <p className="text-xs text-muted">Year {year}</p>
++                    <p className="mt-2 text-sm text-muted">
++                      {topicProgress || attempted.length ? `${Math.max(topicProgress, 1)} topic${topicProgress === 1 ? "" : "s"} in progress` : "Ready to begin"}
++                      {" · "}
++                      {due} review{due === 1 ? "" : "s"} due
++                    </p>
++                  </div>
++                  {attempted.length ? <Progress value={pct} /> : null}
++                  <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-navy">
++                    <Link to="/study/$subject/learn" params={{ subject: subject.id }}>Learn</Link>
++                    <Link to="/study/$subject/practise" params={{ subject: subject.id }}>Practise</Link>
++                    <Link to="/study/$subject/progress" params={{ subject: subject.id }}>Progress</Link>
++                  </div>
+                 </div>
+-                <div>
+-                  <div className="flex justify-between text-xs text-muted">
+-                    <span>{pct}% mastery</span>
+-                    <span>
+-                      {attempted}/{qs.length || topics.length} ready
+-                    </span>
+-                  </div>
+-                  <Progress className="mt-1" value={pct} />
+-                </div>
+-                <div className="grid grid-cols-4 gap-1">
+-                  {MODE_BTNS.map((mode) => (
+-                    <Link
+-                      key={mode.id}
+-                      to={`/study/$subject/${mode.id}` as "/study/$subject/learn"}
+-                      params={{ subject: subject.id }}
+-                      className={`flex min-h-14 flex-col items-center justify-center rounded-xl ${mode.tint} text-[11px] font-medium`}
+-                    >
+-                      <mode.icon className="mb-0.5 size-3.5" />
+-                      {mode.label}
+-                    </Link>
+-                  ))}
+-                </div>
+-              </div>
+-            </Card>
+-          );
+-        })}
+-      </div>
+-      <ScriptQuote>Knowledge is a garden that always grows.</ScriptQuote>
++              </Card>
++            );
++          })}
++        </div>
++      </section>
+     </div>
+   );
+ }
+--- a/src/routes/study.$subject.index.tsx
++++ b/src/routes/study.$subject.index.tsx
+@@ -1,130 +1,115 @@
+ import { createFileRoute, Link } from "@tanstack/react-router";
++import { BookOpen, LineChart, Pencil, RotateCcw } from "lucide-react";
+ import { useEffect } from "react";
+-import { BookOpen, Gamepad2, LineChart, Pencil } from "lucide-react";
++import { StudyYearSelect } from "@/components/study-year-select";
+ import { Card } from "@/components/ui/card";
+-import { ScriptQuote, VineCorner } from "@/components/vine";
+-import { LATIN_NOTES } from "@/lib/content/latin";
+-import { FRENCH_WRITING } from "@/lib/content/french";
++import { Progress } from "@/components/ui/progress";
+ import { questionsFor, topicsFor } from "@/lib/content/banks";
++import { lessonsFor } from "@/lib/content/lessons";
+ import { subjectById } from "@/lib/content/subjects";
+-import { dueReviewCount, useScholar } from "@/lib/store";
+-import { lessonsFor } from "@/lib/content/lessons";
++import { useScholar, type ReviewItem } from "@/lib/store";
++import { todayKey } from "@/lib/utils";
+ 
+ export const Route = createFileRoute("/study/$subject/")({ component: SubjectHub });
+ 
+ const MODES = [
+-  { id: "learn", label: "Learn", detail: "Explore lessons, grammar and vocabulary.", tint: "bg-sky/70", icon: BookOpen },
+-  { id: "practise", label: "Practise", detail: "Build your skills with targeted exercises.", tint: "bg-sage", icon: Pencil },
+-  { id: "play", label: "Play", detail: "Make learning fun with games and challenges.", tint: "bg-blush", icon: Gamepad2 },
+-  { id: "progress", label: "Progress", detail: "Track your improvement and see how far you’ve come.", tint: "bg-lilac/70", icon: LineChart },
++  { id: "learn", label: "Learn", detail: "Understand the topic", tint: "bg-sky/70", icon: BookOpen },
++  { id: "practise", label: "Practise", detail: "Questions & active recall", tint: "bg-sage", icon: Pencil },
++  { id: "review", label: "Review", detail: "Mistakes due again", tint: "bg-blush", icon: RotateCcw },
++  { id: "progress", label: "Progress", detail: "See mastery", tint: "bg-lilac/70", icon: LineChart },
+ ] as const;
+ 
+ function SubjectHub() {
+   const { subject } = Route.useParams();
+   const meta = subjectById(subject)!;
+   const setLast = useScholar((s) => s.setLastSubject);
+-  const reviews = useScholar((s) => s.reviews);
+-  const due = dueReviewCount(reviews);
++  const lastTopic = useScholar((s) => s.lastTopic);
++  const reviews = useScholar((s) => s.reviews) as Record<string, ReviewItem>;
++  const seenCorrect = useScholar((s) => s.seenCorrect);
++  const seenTotal = useScholar((s) => s.seenTotal);
+   const year = useScholar((s) => s.year);
++
+   const questions = questionsFor(subject, year);
+   const lessons = lessonsFor(subject);
+   const topics = topicsFor(subject, year);
++  const currentLesson = lessons.find((item) => item.id === lastTopic) ?? lessons[0];
++  const currentFocus = currentLesson?.title ?? topics[0]?.name ?? "Your next topic";
++  const mastered = questions.filter((item) => (seenCorrect[item.id] ?? 0) >= 2).length;
++  const mastery = questions.length ? Math.round((mastered / questions.length) * 100) : 0;
++  const ids = new Set(questions.map((item) => item.id));
++  const due = Object.entries(reviews).filter(([id, item]) => ids.has(id) && item.due <= todayKey()).length;
+ 
+   useEffect(() => {
+     setLast(subject);
+   }, [subject, setLast]);
+ 
+   return (
+-    <div className="relative space-y-6">
+-      <VineCorner className="absolute -top-6 -left-4 hidden h-36 w-36 lg:block" />
+-      <header className="overflow-hidden rounded-xl bg-card ring-1 ring-line">
+-        <div className="grid md:grid-cols-[1.15fr_0.85fr]">
+-          <div className="p-6 sm:p-8">
+-            <p className="text-xs font-semibold tracking-[0.22em] text-navy uppercase">
+-              {meta.name} · Year {meta.year}
+-            </p>
+-            <h1 className="mt-2 font-display text-5xl font-semibold">{meta.name}</h1>
+-            <p className="mt-3 max-w-xl text-muted">{meta.blurb}</p>
+-            <p className="mt-4 italic text-navy">“{meta.quote}”</p>
++    <div className="space-y-6">
++      <header className="grid overflow-hidden rounded-xl bg-card ring-1 ring-line md:grid-cols-[1.2fr_0.8fr]">
++        <div className="p-6 sm:p-8">
++          <StudyYearSelect subjectName={meta.name} />
++          <h1 className="mt-4 font-display text-5xl font-semibold">{meta.name}</h1>
++          <p className="mt-2 text-sm text-muted">Current focus: {currentFocus}</p>
++
++          <div className="mt-6 rounded-xl bg-sage/70 p-4">
++            <p className="text-xs font-semibold tracking-[0.16em] text-navy uppercase">Continue</p>
++            <h2 className="mt-1 font-display text-2xl font-semibold">{currentFocus}</h2>
++            <div className="mt-3 flex items-center gap-3">
++              <Progress className="max-w-48" value={mastery} />
++              <span className="text-xs tabular-nums text-muted">{mastery}% complete</span>
++            </div>
++            <Link
++              to="/study/$subject/learn"
++              params={{ subject }}
++              className="mt-4 inline-flex rounded-full bg-navy px-4 py-2 text-sm font-medium text-card"
++            >
++              Continue learning →
++            </Link>
+           </div>
+-          <img src={meta.art} alt="" className="h-48 w-full object-cover md:h-full" />
+         </div>
++        <img src={meta.art} alt="" className="h-52 w-full object-cover md:h-full" />
+       </header>
+ 
+       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+-        {MODES.map((mode) => (
+-          <Link key={mode.id} to={`/study/$subject/${mode.id}` as "/study/$subject/learn"} params={{ subject }} className="group">
+-            <Card className={`h-full p-5 transition-transform duration-150 group-hover:-translate-y-0.5 ${mode.tint}`}>
+-              <mode.icon className="size-5 text-navy" />
+-              <h2 className="mt-3 font-display text-2xl font-semibold">{mode.label}</h2>
+-              <p className="mt-1 text-sm text-muted">{mode.detail}</p>
+-              <p className="mt-4 text-xs font-medium tracking-wide text-navy">Start →</p>
+-            </Card>
+-          </Link>
+-        ))}
++        {MODES.map((mode) => {
++          const href = mode.id === "review" ? "practise" : mode.id;
++          return (
++            <Link
++              key={mode.id}
++              to={`/study/$subject/${href}` as "/study/$subject/learn"}
++              params={{ subject }}
++              className="group"
++            >
++              <Card className={`h-full p-5 transition-transform duration-150 group-hover:-translate-y-0.5 ${mode.tint}`}>
++                <mode.icon className="size-5 text-navy" />
++                <h2 className="mt-3 font-display text-2xl font-semibold">{mode.label}</h2>
++                <p className="mt-1 text-sm text-muted">{mode.detail}</p>
++                {mode.id === "review" && due ? (
++                  <p className="mt-3 text-xs font-medium text-navy">{due} due now</p>
++                ) : null}
++              </Card>
++            </Link>
++          );
++        })}
+       </div>
+ 
+-      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
++      <div className="grid gap-4 md:grid-cols-3">
+         <Card className="p-5">
+-          <p className="text-xs font-semibold tracking-[0.18em] text-navy uppercase">Continue where you left off</p>
+-          <h3 className="mt-2 font-display text-2xl font-semibold">{lessons[0]?.title ?? topics[0]?.name ?? "First topic"}</h3>
+-          <p className="mt-1 text-sm text-muted">{lessons[0]?.summary ?? `${questions.length} questions ready.`}</p>
+-          <Link
+-            to="/study/$subject/learn"
+-            params={{ subject }}
+-            className="mt-4 inline-flex rounded-full bg-navy px-4 py-2 text-sm text-card"
+-          >
+-            Continue
+-          </Link>
++          <p className="text-xs tracking-[0.16em] text-navy uppercase">Mastery</p>
++          <p className="mt-1 font-display text-3xl font-semibold">{mastery}%</p>
++          <p className="text-sm text-muted">{mastered} questions secure</p>
+         </Card>
+-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+-          <Card className="p-4">
+-            <p className="text-xs tracking-[0.16em] text-navy uppercase">Due reviews</p>
+-            <p className="font-display text-3xl font-semibold">{due}</p>
+-            <p className="text-sm text-muted">Cards ready to review</p>
+-          </Card>
+-          <Card className="p-4">
+-            <p className="text-xs tracking-[0.16em] text-navy uppercase">Topics</p>
+-            <p className="font-display text-3xl font-semibold">{topics.length}</p>
+-            <p className="text-sm text-muted">{questions.length} practice questions</p>
+-          </Card>
+-        </div>
++        <Card className="p-5">
++          <p className="text-xs tracking-[0.16em] text-navy uppercase">Due for review</p>
++          <p className="mt-1 font-display text-3xl font-semibold">{due}</p>
++          <p className="text-sm text-muted">Previous mistakes ready again</p>
++        </Card>
++        <Card className="p-5">
++          <p className="text-xs tracking-[0.16em] text-navy uppercase">Year {year}</p>
++          <p className="mt-1 font-display text-3xl font-semibold">{topics.length}</p>
++          <p className="text-sm text-muted">{questions.length} questions across your topics</p>
++        </Card>
+       </div>
+-
+-      {subject === "latin" ? (
+-        <Card className="p-5">
+-          <p className="text-xs font-semibold tracking-[0.18em] text-navy uppercase">Featured · Roman Life</p>
+-          <p className="mt-2 text-sm text-muted">Discover the people, places and ideas that shaped a civilisation.</p>
+-          <ul className="mt-3 space-y-1 text-sm">
+-            {LATIN_NOTES.slice(0, 3).map((note) => (
+-              <li key={note.id}>
+-                <span className="font-medium">{note.title}.</span> {note.body}
+-              </li>
+-            ))}
+-          </ul>
+-        </Card>
+-      ) : null}
+-
+-      {subject === "french" ? (
+-        <Card className="overflow-hidden p-0">
+-          <div className="grid md:grid-cols-[1fr_220px]">
+-            <div className="p-5">
+-              <p className="text-xs font-semibold tracking-[0.18em] text-navy uppercase">Featured · French Culture</p>
+-              <h3 className="mt-1 font-display text-2xl font-semibold">Plus loin, ensemble</h3>
+-              <p className="mt-2 text-sm text-muted">
+-                Explore cafés, towns and everyday French — then write about your own ville.
+-              </p>
+-              <Link to="/session/$kind" params={{ kind: "french-writing" }} className="mt-4 inline-flex text-sm font-medium text-navy">
+-                Open writing studio →
+-              </Link>
+-            </div>
+-            <img src="/art/french.jpg" alt="" className="h-36 w-full object-cover md:h-full" />
+-          </div>
+-          <p className="px-5 pb-4 text-xs text-muted">{FRENCH_WRITING.length} writing tasks, including Décris ta ville.</p>
+-        </Card>
+-      ) : null}
+-
+-      <ScriptQuote>Small steps today, a brighter tomorrow.</ScriptQuote>
+     </div>
+   );
+ }
+--- a/src/routes/study.$subject.learn.tsx
++++ b/src/routes/study.$subject.learn.tsx
+@@ -1,5 +1,7 @@
+ import { createFileRoute, Link } from "@tanstack/react-router";
+-import { useState } from "react";
++import { Check, Circle, ChevronDown } from "lucide-react";
++import { useMemo, useState } from "react";
++import { StudyYearSelect } from "@/components/study-year-select";
+ import { Button } from "@/components/ui/button";
+ import { Card } from "@/components/ui/card";
+ import { Input } from "@/components/ui/input";
+@@ -15,43 +17,101 @@
+ function LearnPage() {
+   const { subject } = Route.useParams();
+   const meta = subjectById(subject)!;
+-  const lessons = lessonsFor(subject);
+-  const [active, setActive] = useState(lessons[0]?.id ?? "");
+-  const lesson = lessons.find((item) => item.id === active) ?? lessons[0];
++  const year = useScholar((s) => s.year);
+   const completeLesson = useScholar((s) => s.completeLesson);
+   const done = useScholar((s) => s.lessonsDone);
++  const lastTopic = useScholar((s) => s.lastTopic);
++  const setLastTopic = useScholar((s) => s.setLastTopic);
++
++  const lessons = useMemo(() => lessonsFor(subject), [subject]);
++  const topics = useMemo(() => topicsFor(subject, year), [subject, year]);
++  const initial = lessons.find((item) => item.id === lastTopic)?.id ?? lessons[0]?.id ?? "";
++  const [active, setActive] = useState(initial);
++  const lesson = lessons.find((item) => item.id === active) ?? lessons[0];
++
++  const pickLesson = (id: string) => {
++    setActive(id);
++    setLastTopic(id);
++  };
+ 
+   return (
+     <div className="space-y-6">
+-      <p className="text-xs text-muted">
+-        <Link to="/study/$subject" params={{ subject }} className="hover:text-ink">
+-          {meta.name}
+-        </Link>{" "}
+-        · Learn
+-      </p>
+-      <div className="grid gap-6 lg:grid-cols-[200px_1fr]">
+-        <aside className="space-y-1">
+-          <p className="px-2 text-xs font-semibold tracking-[0.16em] text-navy uppercase">{meta.name}</p>
+-          {lessons.map((item) => (
+-            <button
+-              key={item.id}
+-              type="button"
+-              onClick={() => setActive(item.id)}
+-              className={`block w-full rounded-md px-3 py-2 text-left text-sm ${
+-                item.id === lesson?.id ? "bg-navy text-card" : "hover:bg-sage"
+-              }`}
+-            >
+-              {item.title}
+-            </button>
+-          ))}
+-          {!lessons.length
+-            ? topicsFor(subject).map((topic) => (
+-                <p key={topic.id} className="px-3 py-2 text-sm text-muted">
+-                  {topic.name}
+-                </p>
+-              ))
+-            : null}
++      <div className="flex flex-wrap items-center justify-between gap-3">
++        <p className="text-xs text-muted">
++          <Link to="/study/$subject" params={{ subject }} className="hover:text-ink">
++            {meta.name}
++          </Link>{" "}
++          · Learn
++        </p>
++        <StudyYearSelect subjectName={meta.name} />
++      </div>
++
++      <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
++        <aside className="lg:sticky lg:top-4 lg:self-start">
++          <Card className="p-4">
++            <p className="text-[11px] font-semibold tracking-[0.17em] text-navy uppercase">Current unit</p>
++            <h2 className="mt-1 font-display text-xl font-semibold">
++              {subject === "biology" ? "Cell Biology" : meta.name}
++            </h2>
++
++            {lessons.length ? (
++              <nav className="mt-4 space-y-1">
++                {lessons.slice(0, 6).map((item) => {
++                  const isDone = done.includes(item.id);
++                  const isActive = item.id === lesson?.id;
++                  return (
++                    <button
++                      key={`${item.subject}-${item.id}-${item.title}`}
++                      type="button"
++                      onClick={() => pickLesson(item.id)}
++                      className={`flex w-full items-start gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition ${
++                        isActive ? "bg-navy text-card" : "hover:bg-sage"
++                      }`}
++                    >
++                      {isDone ? (
++                        <Check className={`mt-0.5 size-4 shrink-0 ${isActive ? "text-card" : "text-good"}`} />
++                      ) : (
++                        <Circle className={`mt-0.5 size-3.5 shrink-0 ${isActive ? "fill-card text-card" : "text-muted"}`} />
++                      )}
++                      <span>{item.title}</span>
++                    </button>
++                  );
++                })}
++              </nav>
++            ) : (
++              <p className="mt-3 text-sm text-muted">Lessons for this unit are being organised.</p>
++            )}
++
++            {topics.length > 6 || lessons.length > 6 ? (
++              <details className="mt-4 border-t border-line pt-3">
++                <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-navy">
++                  Other units
++                  <ChevronDown className="size-4" />
++                </summary>
++                <div className="mt-2 max-h-64 space-y-1 overflow-auto pr-1">
++                  {(lessons.length > 6
++                    ? lessons.slice(6).map((item) => ({ id: item.id, name: item.title, lesson: true }))
++                    : topics.slice(6).map((item) => ({ id: item.id, name: item.name, lesson: false }))
++                  ).map((item) =>
++                    item.lesson ? (
++                      <button
++                        key={item.id}
++                        type="button"
++                        onClick={() => pickLesson(item.id)}
++                        className="block w-full rounded-md px-2 py-2 text-left text-sm text-muted hover:bg-sage hover:text-ink"
++                      >
++                        {item.name}
++                      </button>
++                    ) : (
++                      <p key={item.id} className="px-2 py-2 text-sm text-muted">{item.name}</p>
++                    ),
++                  )}
++                </div>
++              </details>
++            ) : null}
++          </Card>
+         </aside>
++
+         {lesson ? (
+           <LessonView
+             lesson={lesson}
+@@ -61,8 +121,20 @@
+           />
+         ) : (
+           <Card className="p-6">
+-            <h1 className="font-display text-3xl font-semibold">{meta.name} lessons</h1>
+-            <p className="mt-2 text-muted">Topics are ready in Practise while illustrated notes grow.</p>
++            <h1 className="font-display text-3xl font-semibold">{meta.name} · Learn</h1>
++            <p className="mt-2 text-muted">
++              Your topic list is ready. Detailed lesson notes can be added without changing this navigation.
++            </p>
++            <div className="mt-5 grid gap-2 sm:grid-cols-2">
++              {topics.slice(0, 8).map((topic) => (
++                <div key={topic.id} className="rounded-lg bg-sage/60 px-3 py-2 text-sm">{topic.name}</div>
++              ))}
++            </div>
++            <Button asChild className="mt-5">
++              <Link to="/study/$subject/practise" params={{ subject }}>
++                Practise this subject
++              </Link>
++            </Button>
+           </Card>
+         )}
+       </div>
+@@ -85,111 +157,145 @@
+   const [verdicts, setVerdicts] = useState<Record<number, boolean>>({});
+ 
+   return (
+-    <div className="space-y-5">
+-      <div>
++    <article className="min-w-0 space-y-5">
++      <header>
+         <p className="text-xs font-semibold tracking-[0.18em] text-navy uppercase">{lesson.kicker}</p>
+-        <h1 className="font-display text-4xl font-semibold">{lesson.title}</h1>
+-        <p className="mt-2 max-w-2xl text-muted">{lesson.summary}</p>
+-      </div>
+-      {lesson.explanation.map((block) => (
+-        <Card key={block.heading} className="p-5">
+-          <h2 className="font-display text-2xl font-semibold">{block.heading}</h2>
+-          <p className="mt-2 text-sm leading-relaxed text-muted">{block.body}</p>
+-        </Card>
+-      ))}
+-      {lesson.example ? (
+-        <Card className="bg-sage p-5">
+-          <p className="font-display text-2xl font-semibold">{lesson.example.latin ?? lesson.example.french}</p>
+-          <p className="mt-1">{lesson.example.english}</p>
+-          <p className="mt-2 text-sm text-muted">{lesson.example.note}</p>
+-        </Card>
+-      ) : null}
+-      {lesson.table ? (
+-        <Card className="overflow-hidden p-0">
+-          <div className="bg-leaf px-5 py-3 text-sm font-medium text-card">{lesson.table.caption}</div>
+-          <table className="w-full text-sm">
+-            <thead className="bg-sage">
+-              <tr>
+-                {lesson.table.headers.map((h) => (
+-                  <th key={h} className="px-4 py-2 text-left font-medium">
+-                    {h}
+-                  </th>
+-                ))}
+-              </tr>
+-            </thead>
+-            <tbody>
+-              {lesson.table.rows.map((row, i) => (
+-                <tr key={i} className="border-t border-line">
+-                  {row.map((cell, j) => (
+-                    <td key={j} className="px-4 py-2">
+-                      {cell}
+-                    </td>
+-                  ))}
+-                </tr>
+-              ))}
+-            </tbody>
+-          </table>
+-        </Card>
+-      ) : null}
+-      {lesson.forming ? <p className="text-sm text-muted">{lesson.forming}</p> : null}
+-      <Card className="p-5">
+-        <h2 className="font-display text-2xl font-semibold">Must remember</h2>
++        <h1 className="mt-1 font-display text-4xl font-semibold">{lesson.title}</h1>
++      </header>
++
++      <Card className="p-5 sm:p-6">
++        <p className="text-xs font-semibold tracking-[0.16em] text-navy uppercase">1 · What you need to know</p>
++        <p className="mt-3 max-w-3xl leading-relaxed text-muted">{lesson.summary}</p>
++        <div className="mt-4 space-y-4">
++          {lesson.explanation.map((block) => (
++            <div key={block.heading}>
++              <h2 className="font-display text-xl font-semibold">{block.heading}</h2>
++              <p className="mt-1 text-sm leading-relaxed text-muted">{block.body}</p>
++            </div>
++          ))}
++        </div>
++      </Card>
++
++      <Card className="p-5 sm:p-6">
++        <p className="text-xs font-semibold tracking-[0.16em] text-navy uppercase">2 · Must remember</p>
+         <ul className="mt-3 space-y-2 text-sm">
+-          {lesson.remember.map((item) => (
++          {lesson.remember.slice(0, 7).map((item) => (
+             <li key={item} className="flex gap-2">
+-              <span className="text-good">✓</span>
+-              {item}
++              <Check className="mt-0.5 size-4 shrink-0 text-good" />
++              <span>{item}</span>
+             </li>
+           ))}
+         </ul>
+       </Card>
+-      <Card className="p-5">
+-        <h2 className="font-display text-2xl font-semibold">Check yourself</h2>
+-        <div className="mt-4 space-y-4">
+-          {lesson.checks.map((item, i) => (
+-            <div key={item.prompt} className="grid gap-2 sm:grid-cols-[1fr_auto]">
+-              <p className="text-sm">
+-                {i + 1}. {item.prompt}
+-              </p>
+-              <div className="flex gap-2">
++
++      {lesson.table ? (
++        <Card className="overflow-hidden p-0">
++          <div className="px-5 pt-5 text-xs font-semibold tracking-[0.16em] text-navy uppercase">3 · Visual / diagram</div>
++          <div className="mt-4 overflow-x-auto">
++            <table className="w-full min-w-[520px] text-sm">
++              <caption className="bg-leaf px-5 py-3 text-left font-medium text-card">{lesson.table.caption}</caption>
++              <thead className="bg-sage">
++                <tr>
++                  {lesson.table.headers.map((heading) => (
++                    <th key={heading} className="px-4 py-2 text-left font-medium">{heading}</th>
++                  ))}
++                </tr>
++              </thead>
++              <tbody>
++                {lesson.table.rows.map((row, i) => (
++                  <tr key={i} className="border-t border-line">
++                    {row.map((cell, j) => <td key={j} className="px-4 py-2">{cell}</td>)}
++                  </tr>
++                ))}
++              </tbody>
++            </table>
++          </div>
++        </Card>
++      ) : (
++        <Card className="border-dashed p-5 sm:p-6">
++          <p className="text-xs font-semibold tracking-[0.16em] text-navy uppercase">3 · Visual / diagram</p>
++          <p className="mt-2 text-sm text-muted">A visual can be added here for this topic without changing the lesson layout.</p>
++        </Card>
++      )}
++
++      <Card className="bg-sage/70 p-5 sm:p-6">
++        <p className="text-xs font-semibold tracking-[0.16em] text-navy uppercase">4 · Worked example</p>
++        {lesson.example ? (
++          <div className="mt-3">
++            <p className="font-display text-2xl font-semibold">{lesson.example.latin ?? lesson.example.french}</p>
++            <p className="mt-1">{lesson.example.english}</p>
++            <p className="mt-2 text-sm text-muted">{lesson.example.note}</p>
++          </div>
++        ) : (
++          <p className="mt-2 text-sm text-muted">
++            {lesson.forming ?? lesson.explanation[0]?.body ?? "Apply the key idea step by step, then explain why the answer is correct."}
++          </p>
++        )}
++      </Card>
++
++      <Card className="p-5 sm:p-6">
++        <p className="text-xs font-semibold tracking-[0.16em] text-navy uppercase">5 · Common mistakes</p>
++        <div className="mt-3 rounded-lg bg-blush/60 p-4 text-sm">
++          <p className="font-medium">Watch for this:</p>
++          <p className="mt-1 text-muted">{lesson.later[0] ?? "Do not rely on the first word you recognise — use the whole rule and context."}</p>
++        </div>
++      </Card>
++
++      <Card className="p-5 sm:p-6">
++        <p className="text-xs font-semibold tracking-[0.16em] text-navy uppercase">6 · Quick Check</p>
++        <p className="mt-1 text-sm text-muted">A short check before you move into full practice.</p>
++        <div className="mt-4 space-y-5">
++          {lesson.checks.slice(0, 3).map((item, i) => (
++            <div key={item.prompt} className="space-y-2">
++              <div className="flex items-start justify-between gap-3">
++                <p className="text-sm">
++                  <span className="mr-2 rounded-full bg-sage px-2 py-0.5 text-[10px] font-semibold text-navy">
++                    {i === 0 ? "Easy" : i === 1 ? "Apply" : "Exam-style"}
++                  </span>
++                  {item.prompt}
++                </p>
++              </div>
++              <div className="flex flex-col gap-2 sm:flex-row">
+                 <Input
+                   value={checks[i] ?? ""}
+-                  onChange={(e) => setChecks((c) => ({ ...c, [i]: e.target.value }))}
+-                  className="h-10"
++                  onChange={(event) => setChecks((current) => ({ ...current, [i]: event.target.value }))}
++                  className="h-10 flex-1"
+                 />
+                 <Button
+                   type="button"
+                   variant="secondary"
+                   onClick={() => {
+                     const ok = [item.answer, ...item.accepted].some(
+-                      (v) => foldLatin(v) === foldLatin(checks[i] ?? ""),
++                      (value) => foldLatin(value) === foldLatin(checks[i] ?? ""),
+                     );
+-                    setVerdicts((v) => ({ ...v, [i]: ok }));
++                    setVerdicts((current) => ({ ...current, [i]: ok }));
+                   }}
+                 >
+                   Check
+                 </Button>
+               </div>
+               {verdicts[i] !== undefined ? (
+-                <p className={`text-xs sm:col-span-2 ${verdicts[i] ? "text-good" : "text-danger"}`}>
+-                  {verdicts[i] ? "Correct." : `Answer: ${item.answer}. ${item.hint}`}
++                <p className={`text-xs ${verdicts[i] ? "text-good" : "text-danger"}`}>
++                  {verdicts[i] ? "Correct — keep going." : `Not yet. ${item.hint} Correct answer: ${item.answer}.`}
+                 </p>
+               ) : null}
+             </div>
+           ))}
+         </div>
+       </Card>
++
+       <div className="flex flex-wrap gap-2">
+         <Button onClick={onComplete} disabled={completed}>
+-          {completed ? "Lesson saved" : "Mark as learned"}
++          {completed ? "Lesson saved ✓" : "Mark as learned"}
+         </Button>
+         <Button asChild variant="secondary">
+           <Link to={practiseHref as "/study/$subject/practise"} params={{ subject: lesson.subject }}>
+-            Practise this topic
++            Practise this topic →
+           </Link>
+         </Button>
+       </div>
++
+       <ScriptQuote>Small steps today, a brighter you tomorrow.</ScriptQuote>
+-    </div>
++    </article>
+   );
+ }
